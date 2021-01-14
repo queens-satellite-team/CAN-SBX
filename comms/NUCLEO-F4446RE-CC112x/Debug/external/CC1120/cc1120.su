@@ -1,0 +1,7 @@
+cc1120.c:14:6:UARTInit	16	static
+cc1120.c:19:6:printToTerminal	24	static
+cc1120.c:26:6:CC1120Init	4	static
+cc1120.c:31:6:writeToRegister	16	static
+cc1120.c:37:6:writeToRegisterExtended	16	static
+cc1120.c:43:6:readFromRegister	16	static
+cc1120.c:49:6:readFromRegisterExtended	16	static
