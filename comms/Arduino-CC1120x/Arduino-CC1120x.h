@@ -1,3 +1,6 @@
+#include "Arduino.h"
+#include "source.cpp"
+
 #define DATAOUT 11     //MOSI --> pin 11
 #define DATAIN  12     //MISO --> pin 12
 #define SPICLOCK  3   //SCLK --> pin 3
@@ -187,11 +190,3 @@
 #define NUM_RXBYTES 0xD7
 #define FIFO_NUM_TXBYTES 0xD8
 #define FIFO_NUM_RXBYTES 0xD9
-
-
-
-byte eeprom_output_data = 0; //receive data
-byte eeprom_input_data = 0;  //send data
-byte clr = 0;                //clear
-
-  
