@@ -190,3 +190,14 @@
 #define NUM_RXBYTES 0xD7
 #define FIFO_NUM_TXBYTES 0xD8
 #define FIFO_NUM_RXBYTES 0xD9
+
+void SendData(byte data);
+byte Receive_data();
+byte Read_eeprom_configuration(int EEPROM_address);
+byte Read_eeprom_extended(int EEPROM_address);
+byte Read_eeprom_direct(int EEPROM_address);
+void Write_eeprom_configuration(int EEPROM_address, int EEPROM_data);
+void Write_eeprom_strobe(int EEPROM_data);
+void Write_eeprom_extended(int EEPROM_address, int EEPROM_data);
+void Write_eeprom_direct(int EEPROM_address, int EEPROM_data);
+char Send_SPI(char verzenden);

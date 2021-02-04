@@ -106,8 +106,8 @@ void Write_eeprom_direct(int EEPROM_address, int EEPROM_data)    //write to Dire
   digitalWrite(SLAVESELECT,HIGH);            //disable device communication 
 }
 
-
-char Send_SPI(char verzenden){
+char Send_SPI(char verzenden)
+{
   uint8_t so = 0x00;
   uint8_t i = 0;
   //NSDELAY
