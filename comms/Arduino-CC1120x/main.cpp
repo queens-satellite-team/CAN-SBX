@@ -1,11 +1,6 @@
 #include "Arduino-CC1120x.h"
-#include "source.cpp"
+#include "Arduino-CC1120x.ino"
 
-byte eeprom_output_data = 0; //receive data
-byte eeprom_input_data = 0;  //send data
-byte clr = 0;                //clear
-
-  
 void setup() 
 {
   pinMode(RESET, OUTPUT);          //reset pin --> output
@@ -190,6 +185,7 @@ Write_eeprom_extended(NUM_TXBYTES, 0x00);
 Write_eeprom_extended(NUM_RXBYTES, 0x00);   
 Write_eeprom_extended(FIFO_NUM_TXBYTES, 0x0F);
 Write_eeprom_extended(FIFO_NUM_RXBYTES, 0x00);
+
 
 }
 
