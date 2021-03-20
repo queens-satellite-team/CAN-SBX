@@ -10,7 +10,7 @@ from picamera.array import PiRGBArray
 import time
 
 # image dimensions (sets as camera resolution)
-iHigh = 1080
+iHigh = 1088
 iWide = 1920
 
 # init parameters
@@ -76,24 +76,29 @@ def calc_attitude(image):
     return roll, stdRoll, pitch, stdPitch, attitudeTime
 
 
-# Connect to Pi Cam and set up
-camera = PiCamera
+# Connect to pi cam and set up
+camera = PiCamera()
 camera.resolution = iWide, iHigh
 raw_capture = PiRGBArray(camera, size=(iWide, iHigh))  # Check if height and width arguments are in the right order!
 
-# MODE 1
-camera.framerate = 1
+# Open file
+attitude = open("horizon_attitudes.txt", "w")
+
+# Set framerate to 1fps
+camera.framerate = 1  # fps
 time.sleep(0.1)
+i = 0
 
 # Stream
-for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port=True): # figure out how to do this for a certain amount of time
-    roll, stdRoll, pitch, stdPitch, attitudeTime = calc_attitude(frame)
-    #  save it?
+for frame in camera.capture_continuous(raw_capture, format='bgr', use_video_port=True): # figure out how to do this for a certain amount of time
+    i = i + 1
+    image = frame.array
+    roll, stdRoll, pitch, stdPitch, attitudeTime = calc_attitude(image)
+    attitude.write("roll= {}+-{},pitch={}+-{},time={}\n".format(roll, stdRoll, pitch, stdPitch, attitudeTime))
+    print("Saving value ", i)
+    
     raw_capture.truncate(0)
     # if horizon detected well enough
     # break
-
-# MODE 2
-camera.framerate = 5
-time.sleep(0.1)
-# etc
+    if i >= 10:
+        break
