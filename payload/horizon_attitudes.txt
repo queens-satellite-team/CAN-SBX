@@ -1,0 +1,10 @@
+roll= nan+-nan,pitch=nan+-nan,time=12.786852836608887
+roll= nan+-nan,pitch=nan+-nan,time=19.753193140029907
+roll= nan+-nan,pitch=nan+-nan,time=26.640333890914917
+roll= nan+-nan,pitch=nan+-nan,time=33.632488489151
+roll= nan+-nan,pitch=nan+-nan,time=40.878432750701904
+roll= nan+-nan,pitch=nan+-nan,time=47.656240701675415
+roll= nan+-nan,pitch=nan+-nan,time=54.64207148551941
+roll= nan+-nan,pitch=nan+-nan,time=61.648481130599976
+roll= nan+-nan,pitch=nan+-nan,time=68.62504529953003
+roll= nan+-nan,pitch=nan+-nan,time=75.61532640457153
