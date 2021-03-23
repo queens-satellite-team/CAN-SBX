@@ -95,7 +95,6 @@ for frame in camera.capture_continuous(raw_capture, format='bgr', use_video_port
     image = frame.array
     roll, stdRoll, pitch, stdPitch, attitudeTime = calc_attitude(image)
     attitude.write("roll= {}+-{},pitch={}+-{},time={}\n".format(roll, stdRoll, pitch, stdPitch, attitudeTime))
-    print("Saving value ", i)
     
     raw_capture.truncate(0)
     # if horizon detected well enough

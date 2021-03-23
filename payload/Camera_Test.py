@@ -23,7 +23,7 @@ camera.resolution = iWide, iHigh
 raw_capture = PiRGBArray(camera, size=(iWide, iHigh))  # Check if height and width arguments are in the right order!
 
 # Set framerate to 1fps
-camera.framerate = 1  # fps
+camera.framerate = 20  # fps
 time.sleep(0.1)
 i = 0
 
