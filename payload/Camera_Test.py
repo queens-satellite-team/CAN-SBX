@@ -11,11 +11,11 @@ iHigh = 1088
 iWide = 1920
 
 # Open file
-testfile = open("test_results.txt", "w")
+testfile = open("test_results30.txt", "w")
 
 # Get start time
 t0 = time.time()
-testfile.write("Start: {}".format(time.asctime(time.gmtime(t0))))
+testfile.write("Start: {}/n".format(time.asctime(time.gmtime(t0))))
 
 # Connect to pi cam and set up
 camera = PiCamera()
@@ -23,7 +23,7 @@ camera.resolution = iWide, iHigh
 raw_capture = PiRGBArray(camera, size=(iWide, iHigh))  # Check if height and width arguments are in the right order!
 
 # Set framerate to 1fps
-camera.framerate = 20  # fps
+camera.framerate = 30  # fps
 time.sleep(0.1)
 i = 0
 
