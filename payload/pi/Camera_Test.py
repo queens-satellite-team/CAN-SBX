@@ -30,6 +30,6 @@ i = 0
 # Stream
 camera.resolution = (iWide, iHigh)
 
-camera.start_recording('my_video.mp4')
+camera.start_recording('my_video.h264')
 camera.wait_recording(60)
 camera.stop_recording()
