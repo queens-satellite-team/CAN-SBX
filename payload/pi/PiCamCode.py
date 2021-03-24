@@ -1,107 +1,105 @@
 # PAYLOAD CONTROL CODE
-# Last updated: March 16 2021 by Kate Szabo
-# This script executes the main control loop for the payload
+# Last updated: March 24 2021 Hawking Tan
+# This is a test on using OpenCV to stream from camera. 
+# you can stop recording by pressing 'Q'
 
 import cv2 as cv  # used to process images
 import numpy as np
-import math as m
-from picamera import PiCamera
-from picamera.array import PiRGBArray
 import time
 
 # image dimensions (sets as camera resolution)
-iHigh = 1088
+iHigh = 1080
 iWide = 1920
 
 # init parameters
-wide = int(iWide / 4)
-intensityB = np.zeros((iHigh, wide))
-intensityR = np.zeros((iHigh, wide))
-Mbr = np.zeros(wide)
-wid = int(iWide / 8)
-pair = np.zeros((2, int(wid)))  # 0 is roll, 1 is pitch
-
-# Get start time
-t0 = time.time()
-
+wide=int(iWide/4)
+intensityB=np.zeros((iHigh,wide))
+intensityR=np.zeros((iHigh,wide))
+Mbr=np.zeros(wide)
+wid=int(iWide/8)
+pair=np.zeros((2,int(wid))) #0 is roll, 1 is pitch
+Llx=np.arange(0,wid)
+Rrx=np.arange(wid,wide)
 
 # FUNCTIONS
 
 def calc_attitude(image):
-    # calculate attitude values for one frame
+ # split has array of colors (B,G,R) with index 0,1,2
+    b,g,r=np.array(cv.split(image))
 
-    # split has array of colors (B,G,R) with index 0,1,2
-    b, g, r = np.array(cv.split(image))
+    #####blur the image
 
-    ##### blur the image
-
-    # Gaussian Blur
-    b = cv.GaussianBlur(b, (13, 13), 0)
-    r = cv.GaussianBlur(r, (13, 13), 0)
+    #Gaussian Blur
+    b = cv.GaussianBlur(b,(13,13),0)
+    r = cv.GaussianBlur(r,(13,13),0)
 
     ###### intensity profile
 
-    # get average of the intensity of the 4 pixels
-    t1 = time.time()
+    #get average of the intensity of the 4 pixels
     for x in range(wide):
-        intensityB[:, x] = b[:, x * 4:(x + 1) * 4].mean(axis=1)
-        intensityR[:, x] = r[:, x * 4:(x + 1) * 4].mean(axis=1)
+        intensityB[:,x]=b[:,x*4:(x+1)*4].mean(axis=1)
+        intensityR[:,x]=r[:,x*4:(x+1)*4].mean(axis=1)
 
     #######plot intensity profile and save to image
-    br = abs(intensityB - intensityR)
+    br=abs(intensityB-intensityR)
 
     ####maximums####
 
-    Mbr = np.argmax(br, axis=0)
-    trace_time = time.time() - t0
+    Mbr=np.argmax(br,axis=0)
+    traceTime=time.time()-t0
 
+    ### remove outliers
+    Lside= np.where(abs(np.flip(Mbr[wid:wide]-np.mean(Mbr)))<3*np.std(Mbr),Mbr[0:wid],False)
+    Rside=np.where(abs(np.flip(Mbr[0:wid]-np.mean(Mbr)))<3*np.std(Mbr),Mbr[wid:wide],False)
+
+    ly=Lside[Lside!= False]
+    ry=Rside[Rside!=False]
+    lx=Llx[Lside!=False]
+    rx=Rrx[Rside!=False]
+
+    #left point (y,dy,x,dx)
+    lp=(np.mean(ly),np.std(ly)/np.sqrt(len(ly)),
+          np.mean(lx),np.std(lx)/np.sqrt(len(lx)))
+    #right point (y,dy,x,dx)
+    rp=(np.mean(ry),np.std(ry)/np.sqrt(len(ry)),
+          np.mean(rx),np.std(rx)/np.sqrt(len(rx)))
     #### Calculate attitudes####
-    # calculate the roll:
-    for i in range(wid):
-        dy = Mbr[i] - Mbr[-(i + 1)]
-        dmy = Mbr[i] + Mbr[-(i + 1)]
-        pair[0, i] = 180 / 3.1415926 * np.arctan(dy / ((wid - i) * 4))
-        pair[1, i] = (dmy / 2 - iHigh / 2) * 63 / iHigh
 
-    # remove outliers
-    cleanRoll = pair[0, abs(pair[0] - np.mean(pair[0])) < 2 * np.std(pair[0])]
-    cleanPitch = pair[1, abs(pair[1] - np.mean(pair[1])) < 2 * np.std(pair[1])]
+    #calculate the actual value
+    theta=(lp[0]-rp[0])/((lp[2]-rp[2])*4)
+    roll=round(180/3.1415926*np.arctan(theta),5)
+    pitch=round(((lp[0]+rp[0])/2-iHigh/2)*63/iHigh,5)
+    #calculate uncertainty. 'uroll' is the uncertainty of roll, 'upitch' is the uncertainty of pitch
+    dtheta=(((lp[1]-rp[1])/(lp[2]-rp[2]))+((rp[3]-lp[3])/(lp[2]-rp[2])**2))/4
 
-    roll = np.mean(cleanRoll)
-    stdRoll = np.std(cleanRoll) / m.sqrt(len(cleanRoll))
-    pitch = np.mean(cleanPitch)
-    stdPitch = np.std(cleanPitch) / m.sqrt(len(cleanPitch))
-    attitudeTime = time.time() - t0
-
-    return roll, stdRoll, pitch, stdPitch, attitudeTime
+    uroll=round(180/3.1415926*(1/(1+theta**2))*dtheta,5)
+    upitch=round(63/2/iHigh*(lp[1]+rp[1]),5)
+    attitudeTime=time.time()-t0
+    return roll, uroll, pitch, upitch, attitudeTime
 
 
 # Connect to pi cam and set up
-camera = PiCamera()
-try:
-    camera.resolution = iWide, iHigh
-    raw_capture = PiRGBArray(camera, size=(iWide, iHigh))  # Check if height and width arguments are in the right order!
 
-    # Open file
-    attitude = open("horizon_attitudes.txt", "w")
 
-    # Set framerate to 1fps
-    camera.framerate = 1  # fps
-    time.sleep(0.1)
-    i = 0
-
-    # Stream
-    for frame in camera.capture_continuous(raw_capture, format='bgr', use_video_port=True): # figure out how to do this for a certain amount of time
-        i = i + 1
-        image = frame.array
-        roll, stdRoll, pitch, stdPitch, attitudeTime = calc_attitude(image)
-        attitude.write("roll= {}+-{},pitch={}+-{},time={}\n".format(roll, stdRoll, pitch, stdPitch, attitudeTime))
+# Open file
+attitude = open("horizon_attitudes.txt", "w")
+vidcap=cv.VideoCapture(0)
+vidcap.set(3, iWide)
+vidcap.set(4, iHigh)
+count=0
+t0 = time.time()
+success,image=vidcap.read()
+# Stream
+while success:
+    t1=time.time()
+    roll, stdRoll, pitch, stdPitch, attitudeTime = calc_attitude(image)
+    attitude.write("roll= {}+-{},pitch={}+-{},time={}, this frame took:{} seconds\n".format(roll, stdRoll, pitch, stdPitch, attitudeTime,time.time()-t1))
     
-        raw_capture.truncate(0)
-        # if horizon detected well enough
-        # break
-        if i >= 10:
-            break
-    pass
-finally:
-    camera.close()
+    if cv.waitKey(1) & 0xFF == ord('q'):
+        break
+    count+=1
+    success,image=vidcap.read()
+
+attitude.close()
+vidcap.release()
+cv.destroyAllWindows()
