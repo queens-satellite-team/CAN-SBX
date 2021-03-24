@@ -1,3 +1,4 @@
+Camera capture rate when frame rate set to 30fps
 Start: Wed Mar 24 19:57:48 2021
 Saving value 1 at time Wed Mar 24 19:57:49 2021
 Saving value 2 at time Wed Mar 24 19:57:50 2021

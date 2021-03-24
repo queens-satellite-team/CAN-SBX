@@ -78,26 +78,30 @@ def calc_attitude(image):
 
 # Connect to pi cam and set up
 camera = PiCamera()
-camera.resolution = iWide, iHigh
-raw_capture = PiRGBArray(camera, size=(iWide, iHigh))  # Check if height and width arguments are in the right order!
+try:
+    camera.resolution = iWide, iHigh
+    raw_capture = PiRGBArray(camera, size=(iWide, iHigh))  # Check if height and width arguments are in the right order!
 
-# Open file
-attitude = open("horizon_attitudes.txt", "w")
+    # Open file
+    attitude = open("horizon_attitudes.txt", "w")
 
-# Set framerate to 1fps
-camera.framerate = 1  # fps
-time.sleep(0.1)
-i = 0
+    # Set framerate to 1fps
+    camera.framerate = 1  # fps
+    time.sleep(0.1)
+    i = 0
 
-# Stream
-for frame in camera.capture_continuous(raw_capture, format='bgr', use_video_port=True): # figure out how to do this for a certain amount of time
-    i = i + 1
-    image = frame.array
-    roll, stdRoll, pitch, stdPitch, attitudeTime = calc_attitude(image)
-    attitude.write("roll= {}+-{},pitch={}+-{},time={}\n".format(roll, stdRoll, pitch, stdPitch, attitudeTime))
+    # Stream
+    for frame in camera.capture_continuous(raw_capture, format='bgr', use_video_port=True): # figure out how to do this for a certain amount of time
+        i = i + 1
+        image = frame.array
+        roll, stdRoll, pitch, stdPitch, attitudeTime = calc_attitude(image)
+        attitude.write("roll= {}+-{},pitch={}+-{},time={}\n".format(roll, stdRoll, pitch, stdPitch, attitudeTime))
     
-    raw_capture.truncate(0)
-    # if horizon detected well enough
-    # break
-    if i >= 10:
-        break
+        raw_capture.truncate(0)
+        # if horizon detected well enough
+        # break
+        if i >= 10:
+            break
+    pass
+finally:
+    camera.close()

@@ -28,15 +28,8 @@ time.sleep(0.1)
 i = 0
 
 # Stream
-for frame in camera.capture_continuous(raw_capture, format='bgr',
-                                       use_video_port=True):  # figure out how to do this for a certain amount of time
-    i = i + 1
-    image = frame.array
+camera.resolution = (iWide, iHigh)
 
-    testfile.write("Saving value {} at time {}\n".format(i, time.asctime(time.gmtime(time.time()))))
-
-    raw_capture.truncate(0)
-    # if horizon detected well enough
-    # break
-    if i >= 10:
-        break
+camera.start_recording('my_video.h264')
+camera.wait_recording(60)
+camera.stop_recording()

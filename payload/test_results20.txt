@@ -1,4 +1,6 @@
-Start: Wed Mar 24 19:56:02 2021/nSaving value 1 at time Wed Mar 24 19:56:04 2021
+Camera save rate when framerate set to 20fps
+Start: Wed Mar 24 19:56:02 2021
+Saving value 1 at time Wed Mar 24 19:56:04 2021
 Saving value 2 at time Wed Mar 24 19:56:04 2021
 Saving value 3 at time Wed Mar 24 19:56:04 2021
 Saving value 4 at time Wed Mar 24 19:56:05 2021
