@@ -23,6 +23,8 @@ THis document outlines everything that needs to get done in order to integrate t
 2. - [ ]  Connect 4 wires to the ADCS arduino GND->GND,  3.3V->3.3V,  SDA->SDA, SCL->SCL
 3. - [ ]  Integrate the code from the file INSET THE NAME OF THE FILE to ADCS arduino script
 - [ ] connect pin ##### on the Arduino to pin ##### on the Pi using one of the male to male jumper wires.
+- [ ] Down load the following libratries:
+     - SparkFun_I2C_GPS_Arduino_Library.h
 
 
 # OBC to Power Integration
