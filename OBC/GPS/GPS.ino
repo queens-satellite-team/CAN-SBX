@@ -1,21 +1,9 @@
-// This file will contain all the code for the GPS
-// This code will eventually be run on the ADCS Arduino
-/*
-  Reading the raw NMEA sentences from the Qwiic GPS module over I2C
-  By: Nathan Seidle
-  SparkFun Electronics
-  Date: April 12th, 2017
-  License: This code is public domain but you buy me a beer if you use this and we meet someday (Beerware license).
+/* This file will contains all the code Reading the raw NMEA sentences from the Qwiic GPS module over I2C
+ This code will eventually be run on the ADCS Arduino
+ DataSheet for GPS https://cdn.sparkfun.com/assets/parts/1/2/2/8/0/GlobalTop_Titan_X1_Datasheet.pdf
 
-  This grabs the incoming NMEA sentences like GNGGA and GNRMC over I2C and outputs them to the serial
-  monitor at 115200bps.
-
-  We've included the library with this example so that you can get started immediately. For the other
-  examples you'll need to install the SparkFun I2C GPS Arduino library from the Library manager.
-
-  Hardware Connections:
-  Attach a Qwiic shield to your RedBoard or Uno.
-  Plug the Qwiic sensor into any port.
+Hardware Connections:
+  Plug the Qwiic sensor into an Arduino using the SCL and SDA
   PORT.print it out at 115200 baud to serial monitor.
 */
 
@@ -23,7 +11,7 @@
 I2CGPS myI2CGPS; //Hook object to the library
 
 #define PORT Serial
-//#define PORT SerialUSB
+
 
 void setup()
 {
