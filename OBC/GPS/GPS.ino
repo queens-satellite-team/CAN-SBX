@@ -12,7 +12,9 @@ I2CGPS myI2CGPS; //Hook object to the library
 
 #define PORT Serial
 
-
+byte protocol_header[6];
+int count;
+byte GNGGA[6]={'$','G','N','G','G','A'};
 void setup()
 {
   PORT.begin(115200);
@@ -23,16 +25,38 @@ void setup()
     PORT.println("Module failed to respond. Please check wiring.");
     delay(500);
   }
-  PORT.println("GPS module found!");
-}
+  PORT.println("GPS module found!");}
 
 void loop()
 {
   while (myI2CGPS.available()) //available() returns the number of new bytes available from the GPS module
   {
     byte incoming = myI2CGPS.read(); //Read the latest byte from Qwiic GPS
-
-    if(incoming == '$') PORT.println(); //Break the sentences onto new lines
+    
+    if(incoming == '$'){
+      count = 0;
+      PORT.println(); //Break the sentences onto new lines
+    }
+    else{
+      count ++;
+    }
+    if(count <= 5){
+    protocol_header[count] = incoming;
+    
+    }
+    if(count==5&&(compareArray(protocol_header,GNGGA,6))==0){
+    PORT.println();
+    PORT.write("match found");
+    PORT.println();
+    }
     PORT.write(incoming); //Print this character
   }
+}
+int compareArray(byte a[],byte b[],int size)  {
+  int i;
+  for(i=0;i<size;i++){
+    if(a[i]!=b[i])
+      return 1;
+  }
+  return 0;
 }
