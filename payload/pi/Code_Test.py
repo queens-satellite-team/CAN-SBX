@@ -7,7 +7,7 @@ from picamera.array import PiRGBArray
 import time
 
 # image dimensions (sets as camera resolution)
-iHigh = 1088
+iHigh = 1080
 iWide = 1920
 
 # Get start time
