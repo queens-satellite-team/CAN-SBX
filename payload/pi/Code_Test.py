@@ -12,7 +12,7 @@ iWide = 1920
 
 # Get start time
 t0 = time.time()
-time_str = time.asctime(time.gmtime(t0))
+time_str = time.strftime("%Y%m%d%H%M%S", time.gmtime(t0))
 print("Timestamp: {}".format(time_str))
 
 # Open file
