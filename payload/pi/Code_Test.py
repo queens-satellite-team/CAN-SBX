@@ -20,7 +20,7 @@ testfile = open("ground_test_results.txt", "a")
 testfile.write("Test time: {}/n".format(time_str))
 
 # Connect to pi cam and capture image
-with picamera.PiCamera() as camera:
+with PiCamera() as camera:
     print("Connecting to camera...")
     camera.resolution = (iWide, iHigh)
     camera.start_preview()
