@@ -10,6 +10,8 @@ import time
 iHigh = 1080
 iWide = 1920
 
+test_name = input("Enter test name: ")
+
 # Get start time
 t0 = time.time()
 time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(t0))
@@ -17,7 +19,7 @@ print("Timestamp: {}".format(time_str))
 
 # Open file
 testfile = open("ground_test_results.txt", "a")
-testfile.write("Test time: {}\t".format(time_str))
+testfile.write(f"Test name: {test_name}\tTimestamp: {time_str}\tResults: ")
 
 # Connect to pi cam and capture image
 with PiCamera() as camera:
