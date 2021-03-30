@@ -41,7 +41,7 @@ Mbr=np.zeros(wide)
 wid=int(iWide/8)
 pair=np.zeros((2,int(wid))) #0 is roll, 1 is pitch
 Llx=np.arange(0,wid)
-Rrx=np.arange(wid+1,wide)
+Rrx=np.arange(wid,wide)
 
 #  HORIZONSCANNER PROGRAM
 # split has array of colors (B,G,R) with index 0,1,2
@@ -70,8 +70,8 @@ Mbr = np.argmax(br, axis=0)
 traceTime = time.time() - t0
 
 ### remove outliers
-Lside = np.where(abs(np.flip(Mbr[wid + 1:wide] - np.mean(Mbr))) < 3 * np.std(Mbr), Mbr[0:wid], False)
-Rside = np.where(abs(np.flip(Mbr[0:wid] - np.mean(Mbr))) < 3 * np.std(Mbr), Mbr[wid + 1:wide], False)
+Lside = np.where(abs(np.flip(Mbr[wid:wide] - np.mean(Mbr))) < 3 * np.std(Mbr), Mbr[0:wid], False)
+Rside = np.where(abs(np.flip(Mbr[0:wid] - np.mean(Mbr))) < 3 * np.std(Mbr), Mbr[wid:wide], False)
 
 ly = Lside[Lside != False]
 ry = Rside[Rside != False]
