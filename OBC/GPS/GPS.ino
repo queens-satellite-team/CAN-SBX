@@ -13,9 +13,11 @@ I2CGPS myI2CGPS; //Hook object to the library
 #define PORT Serial
 
 byte protocol_header[6];
-int count;
+int count=0;
 byte GNGGA[6]={'$','G','N','G','G','A'};
 float altittude;
+boolean header_found=false;
+byte protocol_data[100];
 void setup()
 {
   PORT.begin(115200);
@@ -35,8 +37,13 @@ void loop()
     byte incoming = myI2CGPS.read(); //Read the latest byte from Qwiic GPS
     
     if(incoming == '$'){
+      if(header_found==true){
+      parce_gngga_gps_data(protocol_data,count-5);
+      }
       count = 0;
       PORT.println(); //Break the sentences onto new lines
+      header_found=false;
+      
     }
     else{
       count ++;
@@ -49,7 +56,11 @@ void loop()
     PORT.println();
     PORT.write("match found");
     PORT.println();
+    header_found=true;
     }
+    if(header_found==true){
+      protocol_data[count-5]=incoming;
+      }
     PORT.write(incoming); //Print this character
   }
 }
@@ -62,12 +73,13 @@ int compareArray(byte a[],byte b[],int size)  {
   return 0;
 }
 void parce_gngga_gps_data(byte input[],int size) {
+  if(size<0)return;
   int comma=0;
   int i;
   int j=0;
   byte gps_data[10];
   for(i=0;i<size;i++){
-    if(input[i]=','){
+    if(input[i]==','){
       comma ++;
       }
     if(comma==9&&input[i]!=','){
@@ -75,7 +87,13 @@ void parce_gngga_gps_data(byte input[],int size) {
       j ++;
       }  
     }
-    altittude=byte_array_to_float(gps_data,j);
+   // altittude=byte_array_to_float(gps_data,j);
+    PORT.println();
+    PORT.write("gps data found = ");
+    for(i=0;i<j;i++){
+      PORT.write(gps_data[i]);
+      }
+      PORT.println();
   return;
 }
 //complete this function!!!!
