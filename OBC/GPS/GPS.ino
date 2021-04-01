@@ -15,6 +15,7 @@ I2CGPS myI2CGPS; //Hook object to the library
 byte protocol_header[6];
 int count;
 byte GNGGA[6]={'$','G','N','G','G','A'};
+float altittude;
 void setup()
 {
   PORT.begin(115200);
@@ -60,3 +61,24 @@ int compareArray(byte a[],byte b[],int size)  {
   }
   return 0;
 }
+void parce_gngga_gps_data(byte input[],int size) {
+  int comma=0;
+  int i;
+  int j=0;
+  byte gps_data[10];
+  for(i=0;i<size;i++){
+    if(input[i]=','){
+      comma ++;
+      }
+    if(comma==9&&input[i]!=','){
+      gps_data[j]=input[i];
+      j ++;
+      }  
+    }
+    altittude=byte_array_to_float(gps_data,j);
+  return;
+}
+//complete this function!!!!
+float byte_array_to_float(byte input2[],int size){
+  
+  }
