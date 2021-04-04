@@ -1,35 +1,35 @@
+# CAMERA TEST CODE
+# Last updated: Apr 03 2021 by Kate Szabo
+# This script is for camera testing
 
-
-import numpy as np
-import math as m
 from picamera import PiCamera
-from picamera.array import PiRGBArray
 import time
 
 # image dimensions (sets as camera resolution)
-iHigh = 1088
+iHigh = 1080
 iWide = 1920
 
-# Open file
-testfile = open("test_results30.txt", "w")
-
 # Get start time
-t0 = time.time()
-testfile.write("Start: {}/n".format(time.asctime(time.gmtime(t0))))
+
+video_length = 10  # Video length in seconds
 
 # Connect to pi cam and set up
 camera = PiCamera()
-camera.resolution = iWide, iHigh
-raw_capture = PiRGBArray(camera, size=(iWide, iHigh))  # Check if height and width arguments are in the right order!
+try:
+    camera.resolution = iWide, iHigh
+    camera.framerate = 30  # fps
+    time.sleep(2)
 
-# Set framerate to 1fps
-camera.framerate = 30  # fps
-time.sleep(0.1)
-i = 0
+    t0 = time.time()
+    time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(t0))
 
-# Stream
-camera.resolution = (iWide, iHigh)
+    camera.start_preview()
+    camera.wait_recording(5)
+    camera.stop_preview()
 
-camera.start_recording('my_video.h264')
-camera.wait_recording(60)
-camera.stop_recording()
+    camera.start_recording(f'{time_str}.h264')
+    camera.wait_recording(video_length)
+    camera.stop_recording()
+
+finally:
+    camera.close()
