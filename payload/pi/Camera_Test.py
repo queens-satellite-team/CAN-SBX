@@ -24,7 +24,7 @@ try:
     time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(t0))
 
     camera.start_preview()
-    camera.wait_recording(5)
+    time.sleep(5)
     camera.stop_preview()
 
     camera.start_recording(f'{time_str}.h264')
