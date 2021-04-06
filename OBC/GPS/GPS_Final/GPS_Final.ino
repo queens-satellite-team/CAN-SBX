@@ -1,7 +1,8 @@
 /* Please Note:
 Date and time are in UTC
 Altitude appeared to have a small error (<30m) when <14 sattelites were in view
--Tobias
+-Tobias Chong
+(2021-04-05)
 */
 #include <SparkFun_I2C_GPS_Arduino_Library.h> //Use Library Manager or download here: https://github.com/sparkfun/SparkFun_I2C_GPS_Arduino_Library
 I2CGPS myI2CGPS;
