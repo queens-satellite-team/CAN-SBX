@@ -10,6 +10,13 @@ GPIO.setmode(GPIO.BCM)
 pixel_pin = board.D18
  
 num_pixels = 12
+
+comms = 26
+eps = 5
+adcs = 16
+payload1 = 13
+payload2 = 19
+
  
 ORDER = neopixel.GRB
  
@@ -22,7 +29,7 @@ pixels[0]=(0,255,0)
 pixels.show
  
 
-#power
+#EPS
 if GPIO.input(5):
     pixels[2]=(255,0,0)
     pixels.show
