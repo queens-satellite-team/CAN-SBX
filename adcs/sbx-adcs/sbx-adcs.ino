@@ -10,6 +10,7 @@
 //Booleans controlling what is being read
 int GPS_get_time = 1;
 int GPS_get_coords = 1;
+int GPS_get_alt = 1;
 int BNO_get_orient = 1;
 int BNO_get_gyro = 1;
 int BNO_get_acc = 1;
@@ -24,6 +25,7 @@ int x_time = 1000;
 
 //setup GPS,BNO055,MPU6050
 TinyGPSPlus gps;
+I2CGPS myI2CGPS;
 Adafruit_BNO055 bno = Adafruit_BNO055(55,0x28);
 Adafruit_MPU6050 mpu;
 Adafruit_Sensor *mpu_temp, *mpu_accel, *mpu_gyro;
