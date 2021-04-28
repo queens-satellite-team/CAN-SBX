@@ -4,12 +4,14 @@ THis document outlines everything that needs to get done in order to integrate t
 
 # Hardware
 - Raspberry pi 4 **x1**
+- HDMI cord for Raspberry pi 4 **x1**
+- Raspberry pi charging cord **x1**
 - pi can v1 **x1**
-- LED ring **x1**
-- Gps **x1**
-- male to male jumper wires **x15**
 - 15 way ribbon cabble **x1**
-- solid core wire (TO BE DETERMINED)
+- LED ring **x1**
+- Gps **x1** (Cal has this at the moment)
+- male to male jumper wires **x15**
+- conformal coating **x1**
 
 # General OBC integration
 - [ ] Set up the balloon.py script to run when the pi is turned on with the master switch to do so follow the steps for the first option in [this link](https://www.dexterindustries.com/howto/run-a-program-on-your-ra
