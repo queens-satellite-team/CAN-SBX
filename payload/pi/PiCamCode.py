@@ -20,33 +20,32 @@ iWide = 1920
 
 # Get start time
 
-video_length = 10  # Video length in seconds
+video_length = 100  # Video length in seconds
 
-for n in range(5):
-    # Connect to pi cam and set up
-    with picamera.PiCamera() as camera:
+# Connect to pi cam and set up
+with picamera.PiCamera() as camera:
     
-        try:
-            camera.resolution = iWide, iHigh
-            camera.framerate = 30  # fps
-            # time.sleep(2)
+    try:
+        camera.resolution = iWide, iHigh
+        camera.framerate = 30  # fps
+        # time.sleep(2)
 
-            camera.annotate_background = picamera.Color('black')
+        camera.annotate_background = picamera.Color('black')
         
-            t0 = dt.datetime.now()
-            file_name = t0.strftime('%Y%m%d%H%M%S')
-            file_path = f"/home/CAN-SBX/payload/pi/{file_name}"
-            camera.annotate_text = t0.strftime('%H:%M:%S.%f')
+        t0 = dt.datetime.now()
+        file_name = t0.strftime('%Y%m%d%H%M%S')
+        file_path = f"/home/CAN-SBX/payload/pi/{file_name}"
+        camera.annotate_text = t0.strftime('%H:%M:%S.%f')
 
-            camera.start_recording(f'{file_path}.h264')
-            start = dt.datetime.now()
-            while (dt.datetime.now() - start).seconds < video_length:
-                camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
-                camera.wait_recording(0.2)
-            camera.stop_recording()
-
-        finally:
-            camera.close()
+        camera.start_recording(f'{file_path}.h264')
+        start = dt.datetime.now()
+        print("Started")
+        while (dt.datetime.now() - start).seconds < video_length:
+            camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
+            camera.wait_recording(0.2)
+        camera.stop_recording()
+    finally:
+        camera.close()
 
 # WRITE PIN LOW TO OBC
 GPIO.output(0, GPIO.LOW) #Sets pin to 0V
