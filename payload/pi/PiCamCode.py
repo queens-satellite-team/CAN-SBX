@@ -27,7 +27,7 @@ camera = PiCamera()
 try:
     camera.resolution = iWide, iHigh
     camera.framerate = 30  # fps
-    time.sleep(2)
+    # time.sleep(2)
 
     camera.annotate_background = picamera.Color('black')
     camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
