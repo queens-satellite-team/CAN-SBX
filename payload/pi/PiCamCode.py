@@ -11,7 +11,7 @@ import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
 
 # Set up one output pin
-GPIO.setup(0, GPIO.out)
+GPIO.setup(0, GPIO.OUT)
 GPIO.output(0, GPIO.HIGH) #Sets pin to 3.3v
 
 # image dimensions (sets as camera resolution)
