@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 
 # WRITE PIN HIGH TO OBC
 # Pin setup
-GPIO.setmode(GPIO.board)
+GPIO.setmode(GPIO.BCM)
 
 # Set up one output pin
 GPIO.setup(0, GPIO.out)
