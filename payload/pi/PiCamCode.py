@@ -4,8 +4,15 @@
 
 from picamera import PiCamera
 import time
+import RPI.GPIO as GPIO
 
 # WRITE PIN HIGH TO OBC
+# Pin setup
+    GPIO.setmode(GPIO.Board)
+
+# Set up one output pin
+    GPIO.setup(0, GPIO.out)
+    GPIO.output(0, GPIO.HIGH) #Sets pin to 3.3v
 
 # image dimensions (sets as camera resolution)
 iHigh = 1080
@@ -33,3 +40,6 @@ finally:
     camera.close()
 
 # WRITE PIN LOW TO OBC
+  GPIO.output(0, GPIO.LOW) #Sets pin to 0V
+
+
