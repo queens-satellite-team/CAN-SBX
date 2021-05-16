@@ -3,7 +3,7 @@
 # This script executes the main control script for the payload
 
 from picamera import PiCamera
-import time
+import datetime as dt
 import RPi.GPIO as GPIO
 
 # WRITE PIN HIGH TO OBC
@@ -29,11 +29,14 @@ try:
     camera.framerate = 30  # fps
     time.sleep(2)
 
-    t0 = time.time()
-    time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(t0))
+    camera.annotate_background = picamera.Color('black')
+    camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
 
-    camera.start_recording(f'time_str.h264')
-    camera.wait_recording(video_length)
+    camera.start_recording(f'{time_str}.h264')
+    start = dt.datetime.now()
+    while (dt.datetime.now() - start).seconds < video_length:
+        camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
+        camera.wait_recording(0.2)
     camera.stop_recording()
 
 finally:
