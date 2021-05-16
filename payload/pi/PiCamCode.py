@@ -22,9 +22,10 @@ iWide = 1920
 
 video_length = 10  # Video length in seconds
 
-# Connect to pi cam and set up
-with picamera.PiCamera() as camera:
-    for n in range(5):
+for n in range(5):
+    # Connect to pi cam and set up
+    with picamera.PiCamera() as camera:
+    
         try:
             camera.resolution = iWide, iHigh
             camera.framerate = 30  # fps
