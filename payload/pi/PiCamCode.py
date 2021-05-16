@@ -20,7 +20,7 @@ iWide = 1920
 
 # Get start time
 
-video_length = 3600  # Video length in seconds
+video_length = 10  # Video length in seconds
 
 # Connect to pi cam and set up
 camera = PiCamera()
