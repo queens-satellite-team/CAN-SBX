@@ -4,7 +4,7 @@
 
 from picamera import PiCamera
 import time
-import RPI.GPIO as GPIO
+import RPi.GPIO as GPIO
 
 # WRITE PIN HIGH TO OBC
 # Pin setup
