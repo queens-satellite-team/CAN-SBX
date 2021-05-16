@@ -31,10 +31,11 @@ with picamera.PiCamera() as camera:
 
         camera.annotate_background = picamera.Color('black')
         t0 = dt.datetime.now()
-        time_string = t0.strftime('%Y%m%d%H%M%S')
+        file_name = t0.strftime('%Y%m%d%H%M%S')
+        file_path = f"/home/CAN-SBX/payload/pi/{file_name}"
         camera.annotate_text = t0.strftime('%H:%M:%S.%f')
 
-        camera.start_recording(f'{time_string}.h264')
+        camera.start_recording(f'{file_path}.h264')
         start = dt.datetime.now()
         while (dt.datetime.now() - start).seconds < video_length:
             camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
