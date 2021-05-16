@@ -8,11 +8,11 @@ import RPI.GPIO as GPIO
 
 # WRITE PIN HIGH TO OBC
 # Pin setup
-    GPIO.setmode(GPIO.Board)
+GPIO.setmode(GPIO.Board)
 
 # Set up one output pin
-    GPIO.setup(0, GPIO.out)
-    GPIO.output(0, GPIO.HIGH) #Sets pin to 3.3v
+GPIO.setup(0, GPIO.out)
+GPIO.output(0, GPIO.HIGH) #Sets pin to 3.3v
 
 # image dimensions (sets as camera resolution)
 iHigh = 1080
