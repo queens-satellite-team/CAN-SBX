@@ -40,6 +40,6 @@ finally:
     camera.close()
 
 # WRITE PIN LOW TO OBC
-  GPIO.output(0, GPIO.LOW) #Sets pin to 0V
+GPIO.output(0, GPIO.LOW) #Sets pin to 0V
 
 
