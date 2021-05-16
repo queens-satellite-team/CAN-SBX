@@ -32,7 +32,7 @@ with picamera.PiCamera() as camera:
         camera.annotate_background = picamera.Color('black')
         camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
 
-        camera.start_recording(f'{time_str}.h264')
+        camera.start_recording(f'{dt.datetime.now().strftime('%Y%m%d%H%M%S')}.h264')
         start = dt.datetime.now()
         while (dt.datetime.now() - start).seconds < video_length:
             camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
