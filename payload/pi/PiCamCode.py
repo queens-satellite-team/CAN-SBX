@@ -2,10 +2,17 @@
 # Last updated: Apr 03 2021 by Kate Szabo
 # This script executes the main control script for the payload
 
-from picamera import PiCamera
-import time
+import picamera
+import datetime as dt
+import RPi.GPIO as GPIO
 
 # WRITE PIN HIGH TO OBC
+# Pin setup
+GPIO.setmode(GPIO.BCM)
+
+# Set up one output pin
+GPIO.setup(0, GPIO.OUT)
+GPIO.output(0, GPIO.HIGH) #Sets pin to 3.3v
 
 # image dimensions (sets as camera resolution)
 iHigh = 1080
@@ -13,23 +20,30 @@ iWide = 1920
 
 # Get start time
 
-video_length = 3600  # Video length in seconds
+video_length = 10  # Video length in seconds
 
 # Connect to pi cam and set up
-camera = PiCamera()
-try:
-    camera.resolution = iWide, iHigh
-    camera.framerate = 30  # fps
-    time.sleep(2)
+with picamera.PiCamera() as camera:
+    try:
+        camera.resolution = iWide, iHigh
+        camera.framerate = 30  # fps
+        # time.sleep(2)
 
-    t0 = time.time()
-    time_str = time.strftime("%Y%m%d%H%M%S", time.localtime(t0))
+        camera.annotate_background = picamera.Color('black')
+        t0 = dt.datetime.now()
+        time_string = t0.strftime('%Y%m%d%H%M%S')
+        camera.annotate_text = t0.strftime('%H:%M:%S.%f')
 
-    camera.start_recording(f'time_str.h264')
-    camera.wait_recording(video_length)
-    camera.stop_recording()
+        camera.start_recording(f'{time_string}.h264')
+        start = dt.datetime.now()
+        while (dt.datetime.now() - start).seconds < video_length:
+            camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
+            camera.wait_recording(0.2)
+        camera.stop_recording()
 
-finally:
-    camera.close()
+    finally:
+        camera.close()
 
 # WRITE PIN LOW TO OBC
+GPIO.output(0, GPIO.LOW) #Sets pin to 0V
+GPIO.cleanup()
