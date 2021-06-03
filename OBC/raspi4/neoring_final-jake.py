@@ -15,13 +15,6 @@ GPIO.setup(18, GPIO.OUT)
 pixel_pin = board.D18
  
 num_pixels = 12
-
-#GPIO pins for each subsystem on the pi
-comms = 26
-eps = 5
-adcs = 16
-payload1 = 13
-payload2 = 19
  
 ORDER = neopixel.GRB
  
@@ -33,7 +26,6 @@ pixels = neopixel.NeoPixel(
 pixels[0]=(0,255,0)
 pixels.show()
  
-<<<<<<< HEAD
 while 1:
 #power
     if GPIO.input(5):
@@ -96,55 +88,3 @@ while 1:
 
  
     
-=======
-
-#EPS
-if GPIO.input(eps):
-    pixels[2]=(255,0,0)
-    pixels.show
-    time.sleep(1)
-else:
-    pixels[2]=(0,0,0)
-    pixels.show
-    time.sleep(1)
-
-    
-#payload
-if GPIO.input(payload1):
-    pixels[5]=(255,255,0)
-    pixels.show
-    time.sleep(1)
-else:
-    pixels[5]=(0,0,0)
-    pixels.show
-    time.sleep(1)
-    
-if GPIO.input(payload2):
-    pixels[6]=(255,255,0)
-    pixels.show
-    time.sleep(1)
-else:
-    pixels[6]=(0,0,0)
-    pixels.show
-    time.sleep(1)
-    
-#comms
-if GPIO.input(comms):
-    pixels[8]=(0,0,255)
-    pixels.show
-    time.sleep(1)
-else:
-    pixels[8]=(0,0,0)
-    pixels.show
-    time.sleep(1)
-    
-#ADCS
-if GPIO.input(adcs):
-    pixels[10]=(255,0,255)
-    pixels.show
-    time.sleep(1)
-else:
-    pixels[10]=(0,0,0)
-    pixels.show
-    time.sleep(1)
->>>>>>> 0df0e9fa166bdfa9a23e18220e91e5c91bc33410
