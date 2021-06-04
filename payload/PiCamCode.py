@@ -20,8 +20,8 @@ iWide = 1920
 
 # Get start time
 
-video_length = 10  # Video length in seconds (3600 = 1 hour)
-num_videos = 5 # Number of videos. Note, last video will be corrupted if Pi is powered off before time is up.
+video_length = 900  # Video length in seconds (3600 = 1 hour)
+num_videos = 16 # Number of videos. Note, last video will be corrupted if Pi is powered off before time is up.
 
 # Connect to pi cam and set up
 with picamera.PiCamera() as camera:
@@ -36,7 +36,7 @@ with picamera.PiCamera() as camera:
         for n in range(num_videos):
             t0 = dt.datetime.now()
             file_name = t0.strftime('%Y%m%d%H%M%S')
-            file_path = f"/home/pi/CAN-SBX/payload/pi/{file_name}"
+            file_path = f"/home/pi/CAN-SBX/payload/pi/videos/{file_name}"
             camera.annotate_text = t0.strftime('%H:%M:%S.%f')
 
             camera.start_recording(f'{file_path}.h264')
