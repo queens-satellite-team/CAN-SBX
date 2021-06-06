@@ -4,14 +4,20 @@ import time
 import board
 import neopixel
 
+#GPIO pins for each subsystem on the pi
+comms = 26
+eps = 5
+adcs = 16
+payload1 = 13
+payload2 = 19
+
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(5, GPIO.IN)
-GPIO.setup(6, GPIO.IN)
-GPIO.setup(13, GPIO.IN)
-GPIO.setup(19, GPIO.IN)
-GPIO.setup(26, GPIO.IN)
-GPIO.setup(16, GPIO.IN)
-GPIO.setup(18, GPIO.OUT)
+GPIO.setup(eps, GPIO.IN)
+GPIO.setup(payload1, GPIO.IN)
+GPIO.setup(payload2, GPIO.IN)
+GPIO.setup(comms, GPIO.IN)
+GPIO.setup(adcs, GPIO.IN)
+GPIO.setup(18, GPIO.OUT) #emma - what is this one for?
 pixel_pin = board.D18
  
 num_pixels = 12
@@ -21,7 +27,11 @@ ORDER = neopixel.GRB
 pixels = neopixel.NeoPixel(
     pixel_pin, num_pixels, brightness=0.4, auto_write=False, pixel_order=ORDER
 )
- 
+
+#Turn all the leds off 
+for i in range(12):
+    pixels[i] = (0,0,0)
+    pixels.show()
  
 pixels[0]=(0,255,0)
 pixels.show()
