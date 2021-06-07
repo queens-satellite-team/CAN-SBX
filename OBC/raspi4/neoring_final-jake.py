@@ -1,3 +1,4 @@
+# all colours were taken from from here: https://www.rapidtables.com/web/color/RGB_Color.html
 
 import RPi.GPIO as GPIO
 import time
@@ -37,32 +38,32 @@ pixels = neopixel.NeoPixel(
     pixel_pin, num_pixels, brightness=0.4, auto_write=False, pixel_order=ORDER
 )
 
-#Turn all the leds off 
+#Turn all the leds off when the code runs for the first time
 for i in range(12):
     pixels[i] = (0,0,0)
     pixels.show()
  
 while 1:
     if GPIO.input(payload1Pin) and GPIO.input(payload2Pin) and GPIO.input(epsPin) and GPIO.input(adcsPin) and GPIO.input(commsPin):
-        pixels[statusLed] = (0, 255, 0)  #this should be green
+        pixels[statusLed] = (0, 255, 0)  # green
         pixels.show()
         time.sleep(5)
     else :
-        pixels[statusLed] = (255, 0, 0) #this should be red
+        pixels[statusLed] = (0, 0, 0)
 
 #payload
     if GPIO.input(payload1Pin):
         pixels[payload1Led]=(0,0,0)
         pixels.show()
     else:
-        pixels[payload1Led]=(255,255,0)
+        pixels[payload1Led]=(76,0,153) #  purple
         pixels.show()
 
     if GPIO.input(payload2Pin):
         pixels[payload2Led]=(0,0,0)
         pixels.show()
     else:
-        pixels[payload2Led]=(255,255,0)
+        pixels[payload2Led]=(255,255,255) #  white
         pixels.show()
     
 #adcs
@@ -70,21 +71,22 @@ while 1:
         pixels[adcsLed]=(0,0,0)
         pixels.show()
     else:
-        pixels[adcsLed]=(255,0,255)
+        pixels[adcsLed]=(255,128,0) # orange
         pixels.show()
+    
 #comms
     if GPIO.input(commsPin):
         pixels[commsLed]=(0,0,0)
         pixels.show
     else:
-        pixels[commsLed]=(0,0,255)
+        pixels[commsLed]=(204,204,0)  #  blue
         pixels.show()
-        
+
 #eps
     if GPIO.input(epsPin):
         pixels[epsLed]=(0,0,0)
         pixels.show()
     else:
-        pixels[epsLed]=(255,0,0)
+        pixels[epsLed]=(255,128,0)    #  yellow
         pixels.show()
        
