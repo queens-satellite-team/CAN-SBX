@@ -1,9 +1,8 @@
-<<<<<<< HEAD
+
 #This is a change
-=======
+
 # all colours were taken from from here: https://www.rapidtables.com/web/color/RGB_Color.html
 
->>>>>>> 363b4a93a55b1d4642d15c6aece963b9d9b6bf1e
 import RPi.GPIO as GPIO
 import time
 import board
