@@ -31,45 +31,52 @@ def readNumber():
     return number
 
 def OrientationInit():
-        print('Running. Press CTRL-C to exit.')
-        answer=arduino.readline().decode('utf-8').rstrip()
-        arduino.flush()
-        while answer != 'MPU Initialized':
-            if arduino.isOpen():
-                if  arduino.in_waiting > 0:
-                    answer=arduino.readline().decode('utf-8').rstrip()
-                    #answer=arduino.readline().decode('utf-8').rstrip()
-                    print(answer)
-        arduino.flush()
-                           
-                            
-                           
+    global arduino
+    global answer
+    arduino = serial.Serial()
+    arduino.baudrate= 115200
+    arduino.port = "/dev/ttyACM0"
+    arduino.open()
+    if __name__ == '__main__':
+       # with serial.Serial("/dev/ttyACM0", 115200, timeout=1) as arduino:
+                time.sleep(1) #wait for serial to open
+                print('Running. Press CTRL-C to exit.')
+                answer=arduino.readline().decode('utf-8').rstrip()
+                arduino.flushInput()
+                while answer != 'MPU Initialized':
+                    if arduino.isOpen():
+                        if  arduino.in_waiting > 0:
+                            answer=arduino.readline().decode('utf-8').rstrip()
+                            #answer=arduino.readline().decode('utf-8').rstrip()
+                            print(answer)
+               
 
 def OrientationTransmit():
-                        if arduino.isOpen():
-                            if  arduino.in_waiting > 0:
-                                answer=arduino.readline().decode('utf-8').rstrip()
-                                print(answer)
-                                data_list=list(answer)
-                                writeNumber(ord('<'))
-                                for i in data_list:
-                                    #Sends to the Slaves 
-                                    writeNumber(int(ord(i)))
-                                    time.sleep(.01)
-                                writeNumber(ord('>'))
-                            time.sleep(0.1)
-                        else:
-                            print("no data!")
-                        arduino.flush()
-                        
-        
-if __name__ == '__main__':
-    with serial.Serial("/dev/ttyACM0", 115200, timeout=1) as arduino:
-        time.sleep(1) #wait for serial to open
-        answer=arduino.readline().decode('utf-8').rstrip()
-        arduino.flush()
-        OrientationInit()
-        while ('true'):    
-            OrientationTransmit()
-print("Finished!")
-            
+     if __name__ == '__main__':
+        #with serial.Serial("/dev/ttyACM0", 115200, timeout=1) as arduino:
+                if arduino.isOpen():
+                    time.sleep(0.3)
+                    if  arduino.in_waiting > 0:
+                        input=arduino.in_waiting
+                        answer=arduino.read(input).decode('utf-8').rstrip()
+                        print(answer)
+                        data_list=list(answer)
+                        writeNumber(ord('<'))
+                        for i in data_list:
+                            #Sends to the Slaves 
+                            writeNumber(int(ord(i)))
+                            time.sleep(.001)
+                        writeNumber(ord('>'))
+                        arduino.flushInput()
+                    time.sleep(0.1)
+                else:
+                    print("no data!")
+                arduino.flushInput()
+
+
+
+OrientationInit()
+while ('true'):
+    OrientationTransmit()
+#print("Finished!")
+    
