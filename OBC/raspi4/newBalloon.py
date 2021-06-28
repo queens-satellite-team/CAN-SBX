@@ -8,18 +8,40 @@ import neopixel
 def initLED():
     print("initializing the LED indicator...")
     #GPIO pins that each subsystem connects to on the pi
+    global payload1Pin 
     payload1Pin = 13
+
+    global payload2Pin
     payload2Pin = 19
+
+    global adcsPin
     adcsPin = 16
+
+    global commsPin
     commsPin = 26
+
+    global epsPin
     epsPin = 5
 
     #led numbers for each subsystem
+    
+    
+    global statusLed
     statusLed = 0
+
+    global payload1Led
     payload1Led = 2
+
+    global payload2Led 
     payload2Led = 4
+
+    global adcsLed
     adcsLed = 6
+
+    global commsLed 
     commsLed = 8
+
+    global epsLed
     epsLed = 10
 
     GPIO.setmode(GPIO.BCM)
@@ -33,6 +55,13 @@ def initLED():
     pixel_pin = board.D18
     
     num_pixels = 12
+
+    ORDER = neopixel.GRB
+
+    global pixels
+    pixels = neopixel.NeoPixel(
+    pixel_pin, num_pixels, brightness=0.4, auto_write=False, pixel_order=ORDER
+    )
     
     ORDER = neopixel.GRB
     
@@ -110,7 +139,7 @@ def sendToComms():
 
 
 def main():
-    init()
+    initLED()
     while(1):
         print("Hello World!")
             #call LED indicator
