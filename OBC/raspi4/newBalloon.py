@@ -101,7 +101,7 @@ def LEDindicator():
         pixels[payload1Led]=(0,0,0)
         pixels.show()
     else:
-        pixels[payload1Led]=(76,0,153) #  purple
+        pixels[payload1Led]=(127,0,153) #  purple
         pixels.show()
 
     if GPIO.input(payload2Pin):
@@ -124,7 +124,7 @@ def LEDindicator():
         pixels[commsLed]=(0,0,0)
         pixels.show
     else:
-        pixels[commsLed]=(204,204,0)  #  blue
+        pixels[commsLed]=(0,0,225)  #  blue
         pixels.show()
 
 #eps
@@ -132,12 +132,12 @@ def LEDindicator():
         pixels[epsLed]=(0,0,0)
         pixels.show()
     else:
-        pixels[epsLed]=(255,128,0)    #  yellow
+        pixels[epsLed]=(255,0,0)    #  yellow
         pixels.show()
 
 
 #Writing to I2C bus @ specific address
-def writeNumber(value):
+def writeNumber(address, value):
     bus.write_byte(address, value)
     return -1
 #Read from I2c bus @ specific address
@@ -175,12 +175,12 @@ def OrientationTransmit():
                         answer=arduino.read(input).decode('utf-8').rstrip()
                         print(answer)
                         data_list=list(answer)
-                        writeNumber(ord('<'))
+                        writeNumber(stm_address, ord('<'))
                         for i in data_list:
                             #Sends to the Slaves 
-                            writeNumber(int(ord(i)))
+                            writeNumber(stm_address, int(ord(i)))
                             time.sleep(.001)
-                        writeNumber(ord('>'))
+                        writeNumber(stm_address, ord('>'))
                         arduino.flushInput()
                     time.sleep(0.1)
                 else:
