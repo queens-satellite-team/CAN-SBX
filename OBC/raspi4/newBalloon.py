@@ -1,3 +1,5 @@
+# all colours were taken from from here: https://www.rapidtables.com/web/color/RGB_Color.html
+
 import time
 import RPi.GPIO as GPIO
 import time
@@ -105,7 +107,7 @@ def LEDindicator():
         pixels[adcsLed]=(0,0,0)
         pixels.show()
     else:
-        pixels[adcsLed]=(255,128,0) # orange
+        pixels[adcsLed]=(153,76,0) # orange
         pixels.show()
     
 #comms
@@ -113,7 +115,7 @@ def LEDindicator():
         pixels[commsLed]=(0,0,0)
         pixels.show
     else:
-        pixels[commsLed]=(204,204,0)  #  blue
+        pixels[commsLed]=(0, 0, 225)  #  blue
         pixels.show()
 
 #eps
