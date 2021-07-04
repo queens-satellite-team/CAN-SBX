@@ -13,11 +13,10 @@
  *    - include current values in a buffer called data_tx ( just make sure that the buffer in main loop is the same buffer called in sendData() ).  
  *    - cast data in data_tx buffer as char (we can really only send one byte or char at a time).
  *          - can not be a float. If decimal values are needed, multiply out and let Jake Miley know. 
- *    - package important data with a tag, time stamp, and the actual data (for example: <S1$01:02:0102$00212100>)
+ *    - package important data with a tag, time stamp, and the actual data (for example: <S1$00212100>)
  *          - < > start and end characters 
  *          - $ seperates data pieces
  *          - S1 indicates sensor 1
- *          - 01:02:0102  time in hours, minutes, seconds
  *          - 002121000 current measurement expressed in mA
  *    - package must have a fixed length for all readings
  *    
