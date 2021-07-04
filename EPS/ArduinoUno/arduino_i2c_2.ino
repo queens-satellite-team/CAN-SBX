@@ -9,9 +9,17 @@
  * GND              -> Ground
  * 
  * TO DO:
- *    - implement multiple callback functions which are called depending on received command from master 
- *    - implement "I2C manager" class to handle read/write operations with call backs
- *    - support different data types (only works with <char> currently)
+ *    - update SLAVE_ADDRESS to be 0x11
+ *    - include current values in a buffer called data_tx ( just make sure that the buffer in main loop is the same buffer called in sendData() ).  
+ *    - cast data in data_tx buffer as char (we can really only send one byte or char at a time).
+ *          - can not be a float. If decimal values are needed, multiply out and let Jake Miley know. 
+ *    - package important data with a tag, time stamp, and the actual data (for example: <S1$00212100>)
+ *          - < > start and end characters 
+ *          - $ seperates data pieces
+ *          - S1 indicates sensor 1
+ *          - 002121000 current measurement expressed in mA
+ *    - package must have a fixed length for all readings
+ *    
  *    
  * - please reach out for any and all questions - 
 */
