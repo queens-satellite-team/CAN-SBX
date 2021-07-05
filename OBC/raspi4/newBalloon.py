@@ -49,6 +49,7 @@ global arduino_address
 arduino_address = 0x11
 
 global program_start_time
+program_start_time = time.time()
 ####################################################################
 ####################### CONTROL SUBROUTINES ########################
 ####################################################################
@@ -102,9 +103,8 @@ def LEDInit():
     global pixels 
     pixels = neopixel.NeoPixel(
         pixel_pin, num_pixels, brightness=0.4, auto_write=False, pixel_order=ORDER
-    ) 
-
-#Turn all the leds off when the code runs for the first time
+    )
+    #Turn all the leds off when the code runs for the first time
     for i in range(12):
         pixels[i] = (0,0,0)
         pixels.show()
@@ -112,54 +112,59 @@ def LEDInit():
 
 ##### LED indicator ####
 def LEDindicator():
-    print("run the LED function")
-    if GPIO.input(payload1Pin) and GPIO.input(payload2Pin) and GPIO.input(epsPin) and GPIO.input(adcsPin) and GPIO.input(commsPin):
-        pixels[statusLed] = (0, 255, 0)  # green
-        pixels.show()
-        time.sleep(5)
-    else :
-        pixels[statusLed] = (0, 0, 0)
+    if ((int(time.time()) - int(program_start_time)) % 3 == 0):    
+        print("run the LED function")
+        if GPIO.input(payload1Pin) and GPIO.input(payload2Pin) and GPIO.input(epsPin) and GPIO.input(adcsPin) and GPIO.input(commsPin):
+            pixels[statusLed] = (0, 255, 0)  # green
+            pixels.show()
+            time.sleep(5)
+        else :
+            pixels[statusLed] = (0, 0, 0)
 
-#payload
-    if GPIO.input(payload1Pin):
-        pixels[payload1Led]=(0,0,0)
-        pixels.show()
-    else:
-        pixels[payload1Led]=(127,0,153) #  purple
-        pixels.show()
+    #payload
+        if GPIO.input(payload1Pin):
+            pixels[payload1Led]=(0,0,0)
+            pixels.show()
+        else:
+            pixels[payload1Led]=(127,0,153) #  purple
+            pixels.show()
 
-    if GPIO.input(payload2Pin):
-        pixels[payload2Led]=(0,0,0)
-        pixels.show()
-    else:
-        pixels[payload2Led]=(255,255,255) #  white
-        pixels.show()
-    
-#adcs
-    if GPIO.input(adcsPin):
-        pixels[adcsLed]=(0,0,0)
-        pixels.show()
-    else:
-        pixels[adcsLed]=(255,128,0) # orange
-        pixels.show()
-    
-#comms
-    if GPIO.input(commsPin):
-        pixels[commsLed]=(0,0,0)
-        pixels.show
-    else:
-        pixels[commsLed]=(0,0,225)  #  blue
-        pixels.show()
+        if GPIO.input(payload2Pin):
+            pixels[payload2Led]=(0,0,0)
+            pixels.show()
+        else:
+            pixels[payload2Led]=(255,255,255) #  white
+            pixels.show()
+        
+    #adcs
+        if GPIO.input(adcsPin):
+            pixels[adcsLed]=(0,0,0)
+            pixels.show()
+        else:
+            pixels[adcsLed]=(255,128,0) # orange
+            pixels.show()
+        
+    #comms
+        if GPIO.input(commsPin):
+            pixels[commsLed]=(0,0,0)
+            pixels.show
+        else:
+            pixels[commsLed]=(0,0,225)  #  blue
+            pixels.show()
 
-#eps
-    if GPIO.input(epsPin):
-        pixels[epsLed]=(0,0,0)
-        pixels.show()
+    #eps
+        if GPIO.input(epsPin):
+            pixels[epsLed]=(0,0,0)
+            pixels.show()
+        else:
+            pixels[epsLed]=(255,0,0)    #  yellow
+            pixels.show()
     else:
-        pixels[epsLed]=(255,0,0)    #  yellow
-        pixels.show()
+        for i in range(12):
+            pixels[i] = (0,0,0)
+            pixels.show()
 
-#Short Timeout. Will return FALSE if over one second has passed in the loop
+#Timeout function. Will return FALSE if 'timeout' seconds have passed. Must be given the current time with time.time()
 def Timeout(current_time, timeout):
     if time.time() > current_time + timeout:
         time_marker = 0;
@@ -168,16 +173,16 @@ def Timeout(current_time, timeout):
         return True
     
 
-#Writing to I2C bus @ specific address
+#Writing character to I2C bus @ specific address
 def writeNumber(address, value):
     try:
-        bus.write_byte(address, value)
+        bus.write_byte(address, ord(value))
     except:
-        print("STM Not Connected!")
+        print("Device with address:", address, "is not connected!")
         pass
     return -1
 
-#Writing to I2C bus @ specific address
+#Writing string to I2C bus @ specific address
 def writeString(address, word):
     try:
         for character in word:
@@ -192,6 +197,7 @@ def readNumber():
     number = bus.read_byte_data(address, 1)
     return number
 
+#Initializes the Orientation function by running through all the initial, irrelevant serial data
 def OrientationInit():
     global arduino
     arduino = serial.Serial()
@@ -212,8 +218,74 @@ def OrientationInit():
                     #answer=arduino.readline().decode('utf-8').rstrip()
                     print(answer)
                
+#Used to print data received from the EPS to the python terminal.
+def print_list(l):
+    if l == ' ' or l is None:
+        print()
+    else:
+        for c in l:
+            print(c, end='')
+        print()
 
-def OrientationTransmit():
+#Requests a single byte from the EPS
+def read_single_EPS():
+    try:
+        number = bus.read_byte_data(arduino_address, 1)
+        return chr(number)
+    except:
+        print("EPS not connected!")
+        pass
+ 
+#Requests bytes from EPS until a '>' character is found indicating that the information transfer is complete.  
+def read_multi_EPS():
+        rx = []
+        i = 0
+        if read_single_EPS() == '<':
+            rx.append(read_single_EPS())
+            current_time = time.time()
+            while rx[i] != '>' and Timeout(current_time, 1):
+                rx.append(read_single_EPS())
+                i = i + 1
+            return rx
+
+#Transmits 'data' from OBC to comms. Note that start characters ('<') and end characters ('>') are required as well.
+def OBC_to_COMMS(data):
+    data_list=list(data)
+    for i in data_list:
+        #Sends to the Slaves
+        if i is None:
+            writeNumber(stm_address, '~')
+            print ("Could not write value to STM!")
+        else:
+            writeNumber(stm_address, i)
+            time.sleep(.001)
+
+#When data is ready to be sent to comms PreData is called to get and display the time of data transfer.
+def PreData():
+    writeNumber(stm_address, '<')
+    writeString(stm_address, "Time: ")
+    current_time = int(time.time()) - int(program_start_time)
+    minutes = int(current_time/60)
+    seconds = int(current_time % 60)
+    writeString(stm_address, str(minutes))
+    writeNumber(stm_address, 'm')   
+    writeString(stm_address, str(seconds))
+    writeNumber(stm_address, 's')
+    writeNumber(stm_address, ',')
+    writeNumber(stm_address, ' ')
+ 
+#Transmits EPS data to COMMS 
+def EPSTransmit():
+        rx_data = read_multi_EPS()
+        if rx_data is not None:
+            print_list(rx_data)
+            PreData()
+            writeString(stm_address, "EPS Data: ")
+            OBC_to_COMMS(rx_data)
+            writeNumber(stm_address, '>')
+
+#Transmits ADCS data to COMMS
+def ADCSTransmit():
      if __name__ == '__main__':
         #with serial.Serial("/dev/ttyACM0", 115200, timeout=1) as arduino:
         if arduino.isOpen():
@@ -222,100 +294,30 @@ def OrientationTransmit():
                 input=arduino.in_waiting
                 answer=arduino.read(input).decode('utf-8').rstrip()
                 print(answer)
-                writeNumber(stm_address, ord('<'))
+                writeNumber(stm_address, '<')
+                PreData()
+                writeString(stm_address, "Orientation Data: ")
                 OBC_to_COMMS(answer)
-                writeNumber(stm_address, ord('>'))
+                writeNumber(stm_address, '>')
                 arduino.flushInput()
             time.sleep(0.1)
         else:
             print("no data!")
         arduino.flushInput()
 
-def print_list(l):
-    if l == ' ' or l is None:
-        print()
-    else:
-        for c in l:
-            print(c, end='')
-        print()
-        
-def read_single_EPS():
-    try:
-        number = bus.read_byte_data(arduino_address, 1)
-        return chr(number)
-    except:
-        print("EPS not connected!")
-        pass
-    
-def read_multi_EPS():
-        rx = []
-        i = 0
-        if read_single_EPS() == '<':
-            rx.append(read_single_EPS())
-            while rx[i] != '>':
-                rx.append(read_single_EPS())
-                i = i + 1
-            return rx
-def EPS_PreData():
-    writeNumber(stm_address, ord('<'))
-    time = "Time:"
-    writeString(stm_address, time)
-    current_time = int(program_start_time) - int(time.time())
-    minutes = str(int(current_time/60))
-    seconds = str(current_time % 60)
-    writeString(stm_address, minutes)
-    writeNumber(stm_address, ord('m'))   
-    writeString(stm_address, seconds)
-    writeNumber(stm_address, ord('s'))
-    
-def do_read_EPS(data):
-    request_num = int(data)
-    if request_num != 0 or not None:
-        rx_data = read_multi_EPS()
-        if len(rx_data)>0:
-            print_list(rx_data)
-            EPS_PreData()
-            OBC_to_COMMS(rx_data)
-            writeNumber(stm_address, ord('>'))
-    else:
-        raise ValueError("error: expected number of rx bytes!")
-   
-def OBC_to_COMMS(data):
-    data_list=list(data)
-    for i in data_list:
-        #Sends to the Slaves
-        if i is None:
-            writeNumber(stm_address, int(ord('~')))
-            print ("Could not write value to STM!")
-        else:
-            writeNumber(stm_address, int(ord(i)))
-            time.sleep(.001)
+
 
 ####################################################################
 ########################## MAIN PROGRAM ############################
 ####################################################################
-'''
-begintime = time.gmtime(0)
-print(begintime)
-Program_Start_Time = time.time()
-intstarttime = int(Program_Start_Time)
-print(intstarttime)
-while (Timeout(Program_Start_Time, 10)):
-    current_time = int(time.time()) - intstarttime
-    print(current_time)
-       
-'''
+
 def main():
     
 ######################### INITIALIZATION ###########################
-    program_start_time = time.time()
     print("Hello World!")
     LEDInit()
     OrientationInit()
-    current_time = time.time()
-    while Timeout(current_time, 1):
-           print(current_time)
-           print(time.time())
+
 ########################### MAIN LOOP ##############################
     
     while(1):
@@ -323,11 +325,10 @@ def main():
         #call LED indicator
         LEDindicator()
         #Transmit data from ADCS to Comms
-        OrientationTransmit()
-        do_read_EPS(6)
-        #readFromEPS()
-        #sendToComms()
-        time.sleep(0.5)
+        ADCSTransmit()
+        #Transmit data from EPS to Comms
+        EPSTransmit()
+        time.sleep(0.2)
 
 if __name__ == "__main__":
     main()
