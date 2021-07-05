@@ -48,7 +48,7 @@ stm_address = 0x04
 global arduino_address
 arduino_address = 0x11
 
-
+global program_start_time
 ####################################################################
 ####################### CONTROL SUBROUTINES ########################
 ####################################################################
@@ -159,19 +159,13 @@ def LEDindicator():
         pixels[epsLed]=(255,0,0)    #  yellow
         pixels.show()
 
-#Ensuring the I2C Device is connected
-def isConnectedI2C(address):
-    p = subprocess.Popen(['i2cdetect', '-y', '1'],stdout=subprocess.PIPE,)
-    for i in range(0,9):
-        line = str(p.stdout.readline())
-    print(p)
-    print(line)
-    isConnected = line.find(str(address))
-    if (isConnected == -1):
+#Short Timeout. Will return FALSE if over one second has passed in the loop
+def Timeout(current_time, timeout):
+    if time.time() > current_time + timeout:
+        time_marker = 0;
         return False
     else:
         return True
-        
     
 
 #Writing to I2C bus @ specific address
@@ -182,6 +176,17 @@ def writeNumber(address, value):
         print("STM Not Connected!")
         pass
     return -1
+
+#Writing to I2C bus @ specific address
+def writeString(address, word):
+    try:
+        for character in word:
+            bus.write_byte(address, ord(character))
+    except:
+        print("STM Not Connected!")
+        pass
+    return -1
+
 #Read from I2c bus @ specific address
 def readNumber():
     number = bus.read_byte_data(address, 1)
@@ -199,7 +204,8 @@ def OrientationInit():
         print('Running. Press CTRL-C to exit.')
         answer=arduino.readline().decode('utf-8').rstrip()
         arduino.flushInput()
-        while answer != 'MPU Initialized':
+        saved_time = time.time()
+        while answer != 'MPU Initialized' and Timeout(saved_time, 1):
             if arduino.isOpen():
                 if  arduino.in_waiting > 0:
                     answer=arduino.readline().decode('utf-8').rstrip()
@@ -216,12 +222,8 @@ def OrientationTransmit():
                 input=arduino.in_waiting
                 answer=arduino.read(input).decode('utf-8').rstrip()
                 print(answer)
-                data_list=list(answer)
                 writeNumber(stm_address, ord('<'))
-                for i in data_list:
-                    #Sends to the Slaves 
-                    writeNumber(stm_address, int(ord(i)))
-                    time.sleep(.001)
+                OBC_to_COMMS(answer)
                 writeNumber(stm_address, ord('>'))
                 arduino.flushInput()
             time.sleep(0.1)
@@ -245,45 +247,75 @@ def read_single_EPS():
         print("EPS not connected!")
         pass
     
-def read_multi_EPS(count):
-    rx = []
-    for i in range(count):
-        rx.append(read_single_EPS())
-    return rx
-
+def read_multi_EPS():
+        rx = []
+        i = 0
+        if read_single_EPS() == '<':
+            rx.append(read_single_EPS())
+            while rx[i] != '>':
+                rx.append(read_single_EPS())
+                i = i + 1
+            return rx
+def EPS_PreData():
+    writeNumber(stm_address, ord('<'))
+    time = "Time:"
+    writeString(stm_address, time)
+    current_time = int(program_start_time) - int(time.time())
+    minutes = str(int(current_time/60))
+    seconds = str(current_time % 60)
+    writeString(stm_address, minutes)
+    writeNumber(stm_address, ord('m'))   
+    writeString(stm_address, seconds)
+    writeNumber(stm_address, ord('s'))
+    
 def do_read_EPS(data):
     request_num = int(data)
     if request_num != 0 or not None:
-        rx_data = read_multi_EPS(request_num)
-        print_list(rx_data)
-        data_list=list(rx_data)
-        writeNumber(stm_address, ord('<'))
-        for i in data_list:
-            #Sends to the Slaves
-            if i is None:
-                writeNumber(stm_address, int(ord('~')))
-                print ("Could not write value to STM!")
-            else:
-                writeNumber(stm_address, int(ord(i)))
-                time.sleep(.001)
-        writeNumber(stm_address, ord('>'))
-        time.sleep(0.1)
+        rx_data = read_multi_EPS()
+        if len(rx_data)>0:
+            print_list(rx_data)
+            EPS_PreData()
+            OBC_to_COMMS(rx_data)
+            writeNumber(stm_address, ord('>'))
     else:
         raise ValueError("error: expected number of rx bytes!")
    
-
+def OBC_to_COMMS(data):
+    data_list=list(data)
+    for i in data_list:
+        #Sends to the Slaves
+        if i is None:
+            writeNumber(stm_address, int(ord('~')))
+            print ("Could not write value to STM!")
+        else:
+            writeNumber(stm_address, int(ord(i)))
+            time.sleep(.001)
 
 ####################################################################
 ########################## MAIN PROGRAM ############################
 ####################################################################
-
+'''
+begintime = time.gmtime(0)
+print(begintime)
+Program_Start_Time = time.time()
+intstarttime = int(Program_Start_Time)
+print(intstarttime)
+while (Timeout(Program_Start_Time, 10)):
+    current_time = int(time.time()) - intstarttime
+    print(current_time)
+       
+'''
 def main():
     
 ######################### INITIALIZATION ###########################
+    program_start_time = time.time()
     print("Hello World!")
     LEDInit()
-    #OrientationInit()
-    
+    OrientationInit()
+    current_time = time.time()
+    while Timeout(current_time, 1):
+           print(current_time)
+           print(time.time())
 ########################### MAIN LOOP ##############################
     
     while(1):
@@ -291,8 +323,8 @@ def main():
         #call LED indicator
         LEDindicator()
         #Transmit data from ADCS to Comms
-        #OrientationTransmit()
-        do_read_EPS(5)
+        OrientationTransmit()
+        do_read_EPS(6)
         #readFromEPS()
         #sendToComms()
         time.sleep(0.5)
