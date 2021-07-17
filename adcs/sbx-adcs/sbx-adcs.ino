@@ -59,7 +59,7 @@ void writeData() {
 
 //Serial communication to OBC
 int relayData(String data) {
-  Serial1.write(data.c_str());
+  //Serial1.write(data.c_str());
   Serial.write(data.c_str());
 }
 
@@ -243,6 +243,10 @@ void setup() {
   mpu_clock.restart();
   snc_clock.restart();
   snc_clock.delay(max_time);
+  
+  pinMode(13,OUTPUT);
+  digitalWrite(13,HIGH);
+  
 }
 
 void loop() {
@@ -269,7 +273,7 @@ void loop() {
       buffer += mpu_data + ",";
     }
     buffer += "\r\n";
-    if (Serial1.available()) {
+    if (Serial.available()) {
       relayData(gps_data);
     }
   }
