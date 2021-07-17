@@ -1,6 +1,6 @@
-# PAYLOAD CONTROL CODE
-# Last updated: Apr 03 2021 by Kate Szabo
-# This script executes the main control script for the payload
+# QSET HORIZON PAYLOAD CONTROL CODE
+# Last updated: July 17 2021 by Kate Szabo kate.szabo@queensu.ca
+# This script executes the main control script for the payload for CAN-SBX 2021
 
 import picamera
 import datetime as dt
@@ -12,6 +12,8 @@ GPIO.setmode(GPIO.BCM)
 
 # Set up one output pin
 GPIO.setup(0, GPIO.OUT)
+t_high = dt.datetime.now()
+run_timestamp = t_high.strftime('%Y%m%d%H%M%S%f')  # Records timestamp of pin high to sync with OBC
 GPIO.output(0, GPIO.HIGH) #Sets pin to 3.3v
 
 # image dimensions (sets as camera resolution)
@@ -21,7 +23,7 @@ iWide = 1920
 # Get start time
 
 video_length = 900  # Video length in seconds (3600 = 1 hour)
-num_videos = 16 # Number of videos. Note, last video will be corrupted if Pi is powered off before time is up.
+num_videos = 16  # Number of videos. Note, last video will be corrupted if Pi is powered off before time is up.
 
 # Connect to pi cam and set up
 with picamera.PiCamera() as camera:
@@ -36,7 +38,7 @@ with picamera.PiCamera() as camera:
         for n in range(num_videos):
             t0 = dt.datetime.now()
             file_name = t0.strftime('%Y%m%d%H%M%S')
-            file_path = f"/home/pi/CAN-SBX/payload/videos/{file_name}"
+            file_path = f"/home/pi/CAN-SBX/payload/videos/{run_timestamp}/{file_name}"
             camera.annotate_text = t0.strftime('%H:%M:%S.%f')
 
             camera.start_recording(f'{file_path}.h264')
