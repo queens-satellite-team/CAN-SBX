@@ -5,6 +5,7 @@
 import picamera
 import datetime as dt
 import RPi.GPIO as GPIO
+import os
 
 # WRITE PIN HIGH TO OBC
 # Pin setup
@@ -15,6 +16,7 @@ GPIO.setup(0, GPIO.OUT)
 t_high = dt.datetime.now()
 run_timestamp = t_high.strftime('%Y%m%d%H%M%S%f')  # Records timestamp of pin high to sync with OBC
 GPIO.output(0, GPIO.HIGH) #Sets pin to 3.3v
+os.mkdir(f"/home/pi/CAN-SBX/payload/videos/{run_timestamp}/")
 
 # image dimensions (sets as camera resolution)
 iHigh = 1080
