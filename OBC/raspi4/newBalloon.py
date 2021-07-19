@@ -71,6 +71,19 @@ def LEDInit():
     global commsLed
     global epsLed
 
+    #Subsystem GPIO status check
+    global payload1status
+    global payload2status
+    global epsstatus
+    global adcsstatus
+    global commsstatus
+    
+    payload1status = 0
+    payload2status = 0
+    epsstatus = 0
+    adcsstatus = 0
+    commsstatus = 0
+    
      #GPIO pins that each subsystem connects to on the pi
     payload1Pin = 13
     payload2Pin = 16
@@ -118,6 +131,7 @@ def LEDindicator():
             pixels[statusLed] = (0, 255, 0)  # green
             pixels.show()
             time.sleep(5)
+            
         else :
             pixels[statusLed] = (0, 0, 0)
 
@@ -125,6 +139,8 @@ def LEDindicator():
         if GPIO.input(payload1Pin):
             pixels[payload1Led]=(0,0,0)
             pixels.show()
+
+            
         else:
             pixels[payload1Led]=(127,0,153) #  purple
             pixels.show()
@@ -164,6 +180,74 @@ def LEDindicator():
             pixels[i] = (0,0,0)
             pixels.show()
 
+def ClockMatching() :
+
+    if payload1status == 0 and GPIO.input(payload1Pin):
+        writeString(stm_address, "<Payload 1 turned on ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        payload1status = 1
+        
+    if payload2status == 0 and GPIO.input(payload2Pin):
+        writeString(stm_address, "<Payload 2 turned on ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        payload2status = 1
+        
+    if epsstatus == 0 and GPIO.input(epsPin):
+        writeNumber(stm_address, '<')
+        writeString(stm_address, "EPS turned on ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        epsstatus = 1
+        
+    if adcsstatus == 0 and GPIO.input(adcsPin):
+        writeNumber(stm_address, '<')
+        writeString(stm_address, "ADCS turned on ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        adcsstatus = 1
+        
+    if commsstatus == 0 and GPIO.input(commsPin):
+        writeNumber(stm_address, '<')
+        writeString(stm_address, "Comms turned on ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        commsstatus = 1
+     
+    if payload1status == 1 and not GPIO.input(payload1Pin):
+        writeString(stm_address, "<Payload 1 turned off ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        payload1status = 0
+        
+    if payload2status == 1 and not GPIO.input(payload2Pin):
+        writeString(stm_address, "<Payload 2 turned off ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        payload2status = 0
+        
+    if epsstatus == 1 and not GPIO.input(epsPin):
+        writeNumber(stm_address, '<')
+        writeString(stm_address, "EPS turned off ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        epsstatus = 0
+        
+    if adcsstatus == 1 and not GPIO.input(adcsPin):
+        writeNumber(stm_address, '<')
+        writeString(stm_address, "ADCS turned off ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        adcsstatus = 0
+        
+    if commsstatus == 1 and not GPIO.input(commsPin):
+        writeNumber(stm_address, '<')
+        writeString(stm_address, "Comms turned off ")
+        writeTime(stm_address)
+        writeString(stm_address, " after the OBC turned on>")
+        commsstatus = 0   
+        
 #Timeout function. Will return FALSE if 'timeout' seconds have passed. Must be given the current time with time.time()
 def Timeout(current_time, timeout):
     if time.time() > current_time + timeout:
@@ -191,6 +275,17 @@ def writeString(address, word):
         print("STM Not Connected!")
         pass
     return -1
+
+def writeTime(address):
+    current_time = int(time.time()) - int(program_start_time)
+    minutes = int(current_time/60)
+    seconds = int(current_time % 60)
+    writeString(address, str(minutes))
+    writeNumber(address, 'm')   
+    writeString(address, str(seconds))
+    writeNumber(address, 's')
+    writeNumber(address, ',')
+    writeNumber(address, ' ')
 
 #Read from I2c bus @ specific address
 def readNumber():
@@ -264,15 +359,7 @@ def OBC_to_COMMS(data):
 def PreData():
     writeNumber(stm_address, '<')
     writeString(stm_address, "Time: ")
-    current_time = int(time.time()) - int(program_start_time)
-    minutes = int(current_time/60)
-    seconds = int(current_time % 60)
-    writeString(stm_address, str(minutes))
-    writeNumber(stm_address, 'm')   
-    writeString(stm_address, str(seconds))
-    writeNumber(stm_address, 's')
-    writeNumber(stm_address, ',')
-    writeNumber(stm_address, ' ')
+    writeTime(stm_address)
  
 #Transmits EPS data to COMMS 
 def EPSTransmit():
