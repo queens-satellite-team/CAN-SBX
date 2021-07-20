@@ -12,7 +12,7 @@ import os
 GPIO.setmode(GPIO.BCM)
 
 # Set up one output pin
-GPIO.setup(0, GPIO.OUT)
+GPIO.setup(17, GPIO.OUT)
 t_high = dt.datetime.now()
 run_timestamp = t_high.strftime('%Y%m%d%H%M%S%f')  # Records timestamp of pin high to sync with OBC
 GPIO.output(0, GPIO.HIGH) #Sets pin to 3.3v
