@@ -85,9 +85,9 @@ def LEDInit():
     commsstatus = 0
     
      #GPIO pins that each subsystem connects to on the pi
-    payload1Pin = 13
+    payload1Pin = 25
     payload2Pin = 16
-    adcsPin = 19
+    adcsPin = 13
     commsPin = 20
     epsPin = 21
 
@@ -130,12 +130,14 @@ def LEDindicator():
         if GPIO.input(payload1Pin) and GPIO.input(payload2Pin) and GPIO.input(epsPin) and GPIO.input(adcsPin) and GPIO.input(commsPin):
             pixels[statusLed] = (0, 255, 0)  # green
             pixels.show()
-            time.sleep(5)
+            
             
         else :
             pixels[statusLed] = (0, 0, 0)
 
     #payload
+        payload1stat = GPIO.input(payload1Pin)
+        print(payload1stat)
         if GPIO.input(payload1Pin):
             pixels[payload1Led]=(0,0,0)
             pixels.show()
@@ -157,7 +159,7 @@ def LEDindicator():
             pixels[adcsLed]=(0,0,0)
             pixels.show()
         else:
-            pixels[adcsLed]=(255,128,0) # orange
+            pixels[adcsLed]=(255,128,0) # yellow
             pixels.show()
         
     #comms
@@ -173,15 +175,21 @@ def LEDindicator():
             pixels[epsLed]=(0,0,0)
             pixels.show()
         else:
-            pixels[epsLed]=(255,0,0)    #  yellow
+            pixels[epsLed]=(255,0,0)    #  red
             pixels.show()
     else:
         for i in range(12):
             pixels[i] = (0,0,0)
             pixels.show()
 
-def ClockMatching() :
-
+def ClockMatching():
+    
+    global payload1status
+    global payload2status
+    global epsstatus
+    global adcsstatus
+    global commsstatus
+    
     if payload1status == 0 and GPIO.input(payload1Pin):
         writeString(stm_address, "<Payload 1 turned on ")
         writeTime(stm_address)
@@ -252,7 +260,7 @@ def ClockMatching() :
 def Timeout(current_time, timeout):
     if time.time() > current_time + timeout:
         time_marker = 0;
-        return False
+        return Fals<e
     else:
         return True
     
@@ -277,13 +285,16 @@ def writeString(address, word):
     return -1
 
 def writeTime(address):
-    current_time = int(time.time()) - int(program_start_time)
+    current_time = time.time() - program_start_time
     minutes = int(current_time/60)
     seconds = int(current_time % 60)
+    milliseconds = int(((current_time-int(current_time))*1000))
     writeString(address, str(minutes))
     writeNumber(address, 'm')   
     writeString(address, str(seconds))
     writeNumber(address, 's')
+    writeString(address, str(milliseconds))
+    writeString(address, 'ms')
     writeNumber(address, ',')
     writeNumber(address, ' ')
 
@@ -408,13 +419,14 @@ def main():
 ########################### MAIN LOOP ##############################
     
     while(1):
-
+        #check which systems are connected 
+        ClockMatching()
         #call LED indicator
         LEDindicator()
         #Transmit data from ADCS to Comms
-        ADCSTransmit()
+        #ADCSTransmit()
         #Transmit data from EPS to Comms
-        EPSTransmit()
+        #EPSTransmit()
         time.sleep(0.2)
 
 if __name__ == "__main__":
