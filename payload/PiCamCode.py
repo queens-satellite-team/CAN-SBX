@@ -10,12 +10,13 @@ import os
 # WRITE PIN HIGH TO OBC
 # Pin setup
 GPIO.setmode(GPIO.BCM)
+pin_out = 17
 
 # Set up one output pin
-GPIO.setup(17, GPIO.OUT)
+GPIO.setup(pin_out, GPIO.OUT)
 t_high = dt.datetime.now()
 run_timestamp = t_high.strftime('%Y%m%d%H%M%S%f')  # Records timestamp of pin high to sync with OBC
-GPIO.output(0, GPIO.HIGH) #Sets pin to 3.3v
+GPIO.output(pin_out, GPIO.HIGH) #Sets pin to 3.3v
 os.mkdir(f"/home/pi/CAN-SBX/payload/videos/{run_timestamp}/")
 
 # image dimensions (sets as camera resolution)
@@ -55,5 +56,5 @@ with picamera.PiCamera() as camera:
         camera.close()
 
 # WRITE PIN LOW TO OBC
-GPIO.output(0, GPIO.LOW) #Sets pin to 0V
+GPIO.output(pin_out, GPIO.LOW) #Sets pin to 0V
 GPIO.cleanup()
