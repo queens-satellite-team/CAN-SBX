@@ -29,6 +29,7 @@
 
 bool radioNumber = 1;           // payload = 0, ground station = 1, sets writing and reading pipe addresses
 bool role = 0;                  // receive = 0, transmit = 1
+bool debug = 0;                 // no print statements = 0, yes print statements = 1
 uint8_t channel = 100;          // frequency channel
 RF24 radio(8, 10);              // hardware connections: CE = 8, CSN = 10 
 
@@ -54,7 +55,7 @@ void setup() {
     /* setup radio */
     if (!radio.begin()) {
         Serial.println(F("<error: radio hardware not responding>"));
-        while (1) {}                // hold in infinite loop
+        while (1) {}  // hold in infinite loop
     }
     radio.setPALevel(RF24_PA_HIGH);
     radio.setAutoAck(true);
@@ -68,19 +69,48 @@ void setup() {
         radio.openWritingPipe(addresses[0]);
         radio.openReadingPipe(1, addresses[1]);
     }
-    radio.startListening();
+
+    if (role) { 
+        radio.stopListening();
+    } else { 
+        radio.startListening();
+    }
 }
 /***********************************************************************************/
 /************************************* loop () *************************************/
 void loop() {
-    radio.startListening();
     
+  if ( role ) { 
+    Serial.println("<success: switched to transmitting>"); 
+    radio.stopListening();
+
+    if (new_data)
+    {
+        if (!radio.write(&transmitted_chars, sizeof(transmitted_chars))) {
+            if (debug){
+                Serial.println(F("<error: could not send>"));
+            }
+        } else {
+            if (debug) {
+                Serial.println(F("<success: sent>"));
+            }
+            new_data = false;
+        }
+    }
+    delay(10);
+
+  } else {
+    if (debug) { 
+      Serial.println("<success: switched to receiving>");
+    }
+    radio.startListening();
+
     if( radio.available() ){                                             
       while ( radio.available() ) {                                   
         radio.read( &received_chars, sizeof(received_chars) );     
       }
-      new_data = true; 
-    }
+        new_data = true; 
+      }
 
     if(new_data == true){
       radio.stopListening();
@@ -89,4 +119,5 @@ void loop() {
       Serial.println(F(">"));
       new_data = false; 
     }
+  }
 }

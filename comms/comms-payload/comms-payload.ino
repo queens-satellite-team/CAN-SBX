@@ -14,6 +14,7 @@
 *   PIN14 (PIN ~D11) -> MOSI
 *   PIN13 (PIN ~D10) -> CSN
 *   PIN11 (PIN ~D08) -> CE
+*   PIN02 (PIN ~D02) -> OBC GPIO
 *   
 *   please feel free to reach out for any and all questions regarding this wee bit of code 
 */
@@ -87,7 +88,11 @@ void setup()
         radio.openReadingPipe(1, addresses[1]);
     }
 
-    radio.stopListening();
+    if (role) { 
+        radio.stopListening();
+    } else { 
+        radio.startListening();
+    }
 
     if (debug) {
         Serial.println(F("<success: arduino is ready>"));
