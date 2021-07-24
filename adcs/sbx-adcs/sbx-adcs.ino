@@ -22,22 +22,40 @@ const int chipSelect = 53;
 File sensorData;
 String buffer;
 unsigned long lastMillis = 0;
+int filecount = 0;
 
 // Define clocks
+Chrono file_clock;
 Chrono gps_clock;
 Chrono bno_clock;
 Chrono mpu_clock;
 Chrono snc_clock; // this clock syncronizes readings
+
+void connectSD(String filename){
+    String heading = String("MEGA_Time,GPS_Hour,GPS_Minute,GPS_Second,GPS_Lat,GPS_Long,GPS_Alt,") +
+                   String("BNO_X,BNO_Y,BNO_Z,BNO_GYRO_X,BNO_GYRO_Y,BNO_GYRO_Z,") +
+                   String("BNO_ACC_X,BNO_ACC_Y,BNO_ACC_Z,BNO_MAG_X,BNO_MAG_Y,BNO_MAG_Z,BNO_TEMP,") +
+                   String("MPU_GYRO_X,MPU_GYRO_Y,MPU_GYRO_Z,MPU_ACC_X,MPU_ACC_Y,MPU_ACC_Z,MPU_TEMP") + "\r\n";
+    if (!SD.exists(filename)) {
+      sensorData = SD.open(filename, FILE_WRITE);
+      sensorData.write(heading.c_str(), heading.length());
+    Serial.print("File not found, initialized\n");
+    }
+    else {
+    sensorData = SD.open(filename, FILE_WRITE);
+    Serial.print("File found\n");
+  }
+}
 
 //write buffer to SD
 void writeData() {
   //write any available data to SD
   unsigned int chunkSize = sensorData.availableForWrite();
 
-  Serial.print(chunkSize);
-  Serial.print("\t");
-  Serial.print(buffer.length());
-  Serial.print("\n");
+//  Serial.print(chunkSize);
+//  Serial.print("\t");
+//  Serial.print(buffer.length());
+//  Serial.print("\n");
   //  Serial.print(buffer.c_str());
   //  Serial.print("\n");
 
@@ -177,54 +195,31 @@ void setup() {
   //Serial1.begin(115200);
   Serial.print("Begin\n");
 
-
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
 
   //init SD file and headers
-  String heading = String("MEGA_Time,GPS_Hour,GPS_Minute,GPS_Second,GPS_Lat,GPS_Long,GPS_Alt,") +
-                   String("BNO_X,BNO_Y,BNO_Z,BNO_GYRO_X,BNO_GYRO_Y,BNO_GYRO_Z,") +
-                   String("BNO_ACC_X,BNO_ACC_Y,BNO_ACC_Z,BNO_MAG_X,BNO_MAG_Y,BNO_MAG_Z,BNO_TEMP,") +
-                   String("MPU_GYRO_X,MPU_GYRO_Y,MPU_GYRO_Z,MPU_ACC_X,MPU_ACC_Y,MPU_ACC_Z,MPU_TEMP") + "\r\n";
   SD.begin(chipSelect);
-  if (!SD.exists("data.txt")) {
-    sensorData = SD.open("data.csv", FILE_WRITE);
-    sensorData.write(heading.c_str(), heading.length());
-
-    Serial.print("File not found, initialized\n");
-
-  } else {
-    sensorData = SD.open("data.csv", FILE_WRITE);
-
-    Serial.print("File found\n");
-
-  }
+  String filename = "data"+String(filecount)+".csv";
+  connectSD(filename);
 
   //Initialize GPS
   while (!myI2CGPS.begin()) {
-
     Serial.print("Waiting for GPS to initialize\n");
-
     delay(500);
   }
-
   Serial.print("GPS Initialized\n");
 
   //Initialize BNO055
   while (!bno.begin()) {
-
     Serial.print("Waiting for BNO to initialize\n");
-
     delay(500);
   }
-
   Serial.print("BNO Initialized\n");
 
   //Initialize MPU6050
   while (!mpu.begin()) {
-
     Serial.print("Waiting for MPU to initialize\n");
-
     delay(500);
   }
   mpu_temp = mpu.getTemperatureSensor();
@@ -233,11 +228,11 @@ void setup() {
   mpu_accel->printSensorDetails();
   mpu_gyro = mpu.getGyroSensor();
   mpu_gyro->printSensorDetails();
-
   Serial.print("MPU Initialized\n");
 
   // Ensure first run gets a reading (This is kinda irrelevant,
   // but makes sure the first reading is syncronized
+  file_clock.restart();
   gps_clock.restart();
   bno_clock.restart();
   mpu_clock.restart();
@@ -262,15 +257,24 @@ void loop() {
       gps_data = readGPS();
       buffer += gps_data + ",";
     }
+    else{
+      buffer += ",,,,,";
+    }
     if (bno_clock.hasPassed(bno_time)) {
       bno_clock.restart();
       bno_data = readBNO();
       buffer += bno_data + ",";
     }
+    else{
+      buffer += ",,,,,,,,,,,,";
+    }
     if (mpu_clock.hasPassed(mpu_time)) {
       mpu_clock.restart();
       mpu_data = readMPU();
       buffer += mpu_data + ",";
+    }
+    else{
+      buffer += ",,,,,,";
     }
     buffer += "\r\n";
     if (Serial.available()) {
@@ -278,4 +282,9 @@ void loop() {
     }
   }
   writeData();
+  if (file_clock.hasPassed(file_time)) {
+    filecount = filecount + 1;
+    String filename = "data"+String(filecount)+".csv";
+    connectSD(filename);
+  }
 }
