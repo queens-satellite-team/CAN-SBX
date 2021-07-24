@@ -17,8 +17,9 @@
 #define MPU_get_temp
 
 //controlling read rate
-const int gps_time = 1000;
-const int bno_time = 1000;
-const int mpu_time = 1000;
+const int file_time = 600000; // milliseconds between new files
+const int gps_time = 1000; 
+const int bno_time = 40;
+const int mpu_time = 40;
 const int min_time = min(min(gps_time, bno_time), mpu_time);
 const int max_time = max(gps_time,max(bno_time,mpu_time));
