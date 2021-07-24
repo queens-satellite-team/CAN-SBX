@@ -435,7 +435,7 @@ def EPSTransmit():
             PreData()
             writeString(stm_address, "EPS Data: ")
             OBC_to_COMMS(rx_data)
-            if ((int(time.time()) - int(program_start_time)) % 5 == 0 and time.time()-int(time.time()) < 0.4):
+            if ((int(time.time()) - int(program_start_time)) % 5 == 0):
                 csvLogger(epsdata)
 
 #Transmits ADCS data to COMMS
@@ -470,9 +470,10 @@ def main():
     
 ######################### INITIALIZATION ###########################
     print("Hello World!")
+    csvInit()
     LEDInit()
     OrientationInit()
-    csvInit()
+
 
 ########################### MAIN LOOP ##############################
     
