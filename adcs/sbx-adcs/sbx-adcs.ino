@@ -23,6 +23,8 @@ File sensorData;
 String buffer;
 unsigned long lastMillis = 0;
 int filecount = 0;
+String filename = "data"+String(filecount)+".csv";
+unsigned long t0 = 0;
 
 // Define clocks
 Chrono file_clock;
@@ -31,7 +33,7 @@ Chrono bno_clock;
 Chrono mpu_clock;
 Chrono snc_clock; // this clock syncronizes readings
 
-void connectSD(String filename){
+void connectSD(){
     String heading = String("MEGA_Time,GPS_Hour,GPS_Minute,GPS_Second,GPS_Lat,GPS_Long,GPS_Alt,") +
                    String("BNO_X,BNO_Y,BNO_Z,BNO_GYRO_X,BNO_GYRO_Y,BNO_GYRO_Z,") +
                    String("BNO_ACC_X,BNO_ACC_Y,BNO_ACC_Z,BNO_MAG_X,BNO_MAG_Y,BNO_MAG_Z,BNO_TEMP,") +
@@ -61,17 +63,15 @@ void writeData() {
 
   if (chunkSize && buffer.length() >= chunkSize) {
     //write to file and blink LED
-    digitalWrite(LED_BUILTIN, HIGH);
 
-    Serial.print(buffer.c_str());
-    Serial.print("\n");
+    //Serial.print(buffer.c_str());
+    //Serial.print("\n");
 
     sensorData.write(buffer.c_str(), chunkSize);
-    digitalWrite(LED_BUILTIN, LOW);
     //remove written data from buffer
     buffer.remove(0, chunkSize);
     sensorData.close();
-    sensorData = SD.open("data.csv", FILE_WRITE);
+    sensorData = SD.open(filename, FILE_WRITE);
   }
 }
 
@@ -195,13 +195,9 @@ void setup() {
   //Serial1.begin(115200);
   Serial.print("Begin\n");
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
-
   //init SD file and headers
   SD.begin(chipSelect);
-  String filename = "data"+String(filecount)+".csv";
-  connectSD(filename);
+  connectSD();
 
   //Initialize GPS
   while (!myI2CGPS.begin()) {
@@ -241,6 +237,7 @@ void setup() {
   
   pinMode(13,OUTPUT);
   digitalWrite(13,HIGH);
+  t0 = millis();
   
 }
 
@@ -251,14 +248,15 @@ void loop() {
   if (snc_clock.hasPassed(min_time)) {
     snc_clock.restart();
     // add a new line to the buffer
-    buffer += String(millis()) + ",";
+    buffer += String(millis() - t0) + ",";
     if (gps_clock.hasPassed(gps_time)) {
       gps_clock.restart();
       gps_data = readGPS();
+      relayData(gps_data);
       buffer += gps_data + ",";
     }
     else{
-      buffer += ",,,,,";
+      buffer += ",,,,,,";
     }
     if (bno_clock.hasPassed(bno_time)) {
       bno_clock.restart();
@@ -277,14 +275,15 @@ void loop() {
       buffer += ",,,,,,";
     }
     buffer += "\r\n";
-    if (Serial.available()) {
-      relayData(gps_data);
-    }
+//    if (Serial.available()) {
+//      relayData(gps_data);
+//    }
   }
   writeData();
   if (file_clock.hasPassed(file_time)) {
     filecount = filecount + 1;
-    String filename = "data"+String(filecount)+".csv";
-    connectSD(filename);
+    filename = "data"+String(filecount)+".csv";
+    connectSD();
+    file_clock.restart();
   }
 }
