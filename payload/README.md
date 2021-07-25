@@ -1,6 +1,8 @@
 # Payload Integration Instructions
 ## Components 
 * Raspberry Pi Zero WH
+  * Payload 1 password: raspberry
+  * Payload 2 password: payload2
 * 32GB MicroSD card
 * Pi0 ribbon cable
 * Raspberry Pi HQ Camera
