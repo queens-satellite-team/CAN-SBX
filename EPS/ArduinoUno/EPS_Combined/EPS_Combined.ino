@@ -28,6 +28,9 @@
 #define SLAVE_ADDRESS 0x11
 #define RX_BUFFER_SIZE 5
 #define TX_BUFFER_SIZE 44
+#define CURRENT_REFERENCE 2110
+#define ARDUINO_REFERENCE 4.98
+#define ANALOG_RESOLUTION 1.024
 
 char data_rx[RX_BUFFER_SIZE];
 char data_tx[TX_BUFFER_SIZE];
@@ -48,12 +51,10 @@ int sensorValue3 = 0;
 int sensorValue4 = 0;
 //int sensorValue5 = 0;
 
-float sensitivity = 0.1;
-int Vref1 = 2508;
-int Vref2 = 2528;
-int Vref3 = 2518;
-int Vref4 = 2513;
-//int Vref5 = 2523;
+float sensitivity = 0.4;
+int current_reference = 2500;
+float arduino_reference = 4.98;
+float analog_resolution = 1.024;
 
 String data_tx_str = "<EPS P1: A.AAA P2: B.BBB O: C.CCC C: D.DDD>";
 
@@ -66,19 +67,19 @@ void setup() {
   Wire.begin(SLAVE_ADDRESS);
   Wire.onReceive(receiveData);
   Wire.onRequest(sendData);
-
   for (int i = 0; i < 44; i++){ 
   data_tx[i] = data_tx_str[i];
   }
+
 }
 
 void loop() {
   for (int i = 0; i < avgSamples; i++)
   {
-    sensorValue1 += analogRead(analogInPin1);
-    sensorValue2 += analogRead(analogInPin2);
-    sensorValue3 += analogRead(analogInPin3);
-    sensorValue4 += analogRead(analogInPin4);
+    sensorValue1 += analogRead(analogInPin1)*arduino_reference/analog_resolution;
+    sensorValue2 += analogRead(analogInPin2)*arduino_reference/analog_resolution;
+    sensorValue3 += analogRead(analogInPin3)*arduino_reference/analog_resolution;
+    sensorValue4 += analogRead(analogInPin4)*arduino_reference/analog_resolution;
     //sensorValue5 += analogRead(analogInPin5);
 
     // wait 10 milliseconds before the next loop
@@ -87,33 +88,51 @@ void loop() {
     delay(10);
 
   }
-
-  sensorValue1 = sensorValue1 / avgSamples;
-  sensorValue2 = sensorValue2 / avgSamples;
+ 
+  sensorValue1 = sensorValue1 / avgSamples; //2161
+  sensorValue2 = sensorValue2 / avgSamples; //2201
   sensorValue3 = sensorValue3 / avgSamples;
   sensorValue4 = sensorValue4 / avgSamples;
   //sensorValue5 = sensorValue5 / avgSamples;
 
-  // The on-board ADC is 10-bits -> 2^10 = 1024 -> 5V / 1024 ~= 4.88mV
-  // The voltage is in millivolts
-  float voltage1 = 4.88 * sensorValue1;
-  float voltage2 = 4.88 * sensorValue2;
-  float voltage3 = 4.88 * sensorValue3;
-  float voltage4 = 4.88 * sensorValue4;
-  //float voltage5 = 4.88 * sensorValue5;
+  Serial.print(sensorValue1);
+  Serial.print("\n");
+  Serial.print(sensorValue2);
+  Serial.print("\n");
+  Serial.print(sensorValue3);
+  Serial.print("\n");
+  Serial.print(sensorValue4);
+  Serial.print("\n");
+  // The current sensors have a current offset of approximately +2.11 Volts. Subtracting it by the current sensor reference current gives us a value in A
+  // The current is in millivolts
+  float current1 = (sensorValue1-current_reference)/sensitivity/1000;
+  if (current1 < 0) {
+        current1 = 0;
+  }
+  float current2 = (sensorValue2-current_reference)/sensitivity/1000;
+  if (current2 < 0) {
+        current2 = 0;
+  }
+  float current3 = (sensorValue3-current_reference)/sensitivity/1000;
+  if (current3 < 0) {
+        current3 = 0;
+  }
+  float current4 = (sensorValue4-current_reference)/sensitivity/1000;
+  if (current4 < 0) {
+        current4 = 0;
+  }
+  Serial.print(current1);
+  Serial.print("\n");
+  Serial.print(current2);
+  Serial.print("\n");
+  Serial.print(current3);
+  Serial.print("\n");
+  Serial.print(current4);
+  Serial.print("\n");
+  delay(500);
 
-  // This will calculate the actual current (in mA)
-  // Using the Vref and sensitivity settings you configure
- /* float current1 = (voltage1 - Vref1) * sensitivity;
-  float current2 = (voltage2 - Vref2) * sensitivity;
-  float current3 = (voltage3 - Vref3) * sensitivity;
-  float current4 = (voltage4 - Vref4) * sensitivity; */
 
-  float current1 = 1.2336595609;
-  float current2 = 1.343789;
-  float current3 = 0.234435;
-  float current4 = 0.459345;
-  //float current5 = (voltage5 - Vref5) * sensitivity;
+  //float current5 = (current5 - Vref5) * sensitivity;
 
   String current1_str = String(current1, 3);
   String current2_str = String(current2, 3);
