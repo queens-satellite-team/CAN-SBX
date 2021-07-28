@@ -35,7 +35,7 @@ import board
 import neopixel
 import os
 import subprocess
-
+import csv
 
 # for RPI version 1, use "bus = smbus.SMBus(0)"
 bus = smbus.SMBus(1)
@@ -54,6 +54,34 @@ program_start_time = time.time()
 ####################### CONTROL SUBROUTINES ########################
 ####################################################################
 
+#csv data logging
+def csvInit():
+    global csv_name
+    csv_name = str(program_start_time)
+    csvfile = open(csv_name, 'w', newline ='', encoding='utf-8')
+    c = csv.writer(csvfile)
+    c.writerow(['Minutes', 'Seconds', 'Milliseconds', 'Message'])
+    current_time = time.time() - program_start_time
+    minutes = str(int(current_time/60))
+    seconds = str(int(current_time % 60))
+    milliseconds = str(int(((current_time-int(current_time))*1000)))
+    data_to_save = [minutes, seconds, milliseconds, 'OBC Program Starts']
+    c.writerow(data_to_save)
+    csvfile.close()
+    
+def csvLogger(message):
+    current_time = time.time() - program_start_time
+    minutes = str(int(current_time/60))
+    seconds = str(int(current_time % 60))
+    milliseconds = str(int(((current_time-int(current_time))*1000)))
+    csvfile = open(csv_name, 'a', newline ='', encoding='utf-8')
+    c = csv.writer(csvfile)
+    data_to_save = [minutes, seconds, milliseconds, message]
+    c.writerow(data_to_save)
+    csvfile.close()
+
+
+#LED Indicator
 def LEDInit():
     print("initializing the LED indicator...")
     #GPIO pins that each subsystem connects to on the pi
@@ -125,8 +153,7 @@ def LEDInit():
 
 ##### LED indicator ####
 def LEDindicator():
-    if ((int(time.time()) - int(program_start_time)) % 3 == 0):    
-        print("run the LED function")
+    if ((int(time.time()) - int(program_start_time)) % 3 == 0): 
         if GPIO.input(payload1Pin) and GPIO.input(payload2Pin) and GPIO.input(epsPin) and GPIO.input(adcsPin) and GPIO.input(commsPin):
             pixels[statusLed] = (0, 255, 0)  # green
             pixels.show()
@@ -195,12 +222,14 @@ def ClockMatching():
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         payload1status = 1
+        csvLogger("Payload 1 turns on")
         
     if payload2status == 0 and GPIO.input(payload2Pin):
         writeString(stm_address, "<Payload 2 turned on ")
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         payload2status = 1
+        csvLogger("Payload 2 turns on")
         
     if epsstatus == 0 and GPIO.input(epsPin):
         writeNumber(stm_address, '<')
@@ -208,6 +237,7 @@ def ClockMatching():
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         epsstatus = 1
+        csvLogger("EPS turns on")
         
     if adcsstatus == 0 and GPIO.input(adcsPin):
         writeNumber(stm_address, '<')
@@ -215,6 +245,7 @@ def ClockMatching():
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         adcsstatus = 1
+        csvLogger("ADCS turns on")
         
     if commsstatus == 0 and GPIO.input(commsPin):
         writeNumber(stm_address, '<')
@@ -222,18 +253,21 @@ def ClockMatching():
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         commsstatus = 1
-     
+        csvLogger("Comms turns on") 
+         
     if payload1status == 1 and not GPIO.input(payload1Pin):
         writeString(stm_address, "<Payload 1 turned off ")
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         payload1status = 0
+        csvLogger("Payload 1 turns off")
         
     if payload2status == 1 and not GPIO.input(payload2Pin):
         writeString(stm_address, "<Payload 2 turned off ")
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         payload2status = 0
+        csvLogger("Payload 2 turns off")
         
     if epsstatus == 1 and not GPIO.input(epsPin):
         writeNumber(stm_address, '<')
@@ -241,6 +275,7 @@ def ClockMatching():
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         epsstatus = 0
+        csvLogger("EPS turns off")
         
     if adcsstatus == 1 and not GPIO.input(adcsPin):
         writeNumber(stm_address, '<')
@@ -248,6 +283,7 @@ def ClockMatching():
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         adcsstatus = 0
+        csvLogger("ADCS turns off")
         
     if commsstatus == 1 and not GPIO.input(commsPin):
         writeNumber(stm_address, '<')
@@ -255,12 +291,13 @@ def ClockMatching():
         writeTime(stm_address)
         writeString(stm_address, " after the OBC turned on>")
         commsstatus = 0   
+        csvLogger("Comms turns off")
         
 #Timeout function. Will return FALSE if 'timeout' seconds have passed. Must be given the current time with time.time()
 def Timeout(current_time, timeout):
     if time.time() > current_time + timeout:
         time_marker = 0;
-        return Fals<e
+        return False
     else:
         return True
     
@@ -309,19 +346,22 @@ def OrientationInit():
     arduino = serial.Serial()
     arduino.baudrate= 115200
     arduino.port = "/dev/ttyACM0"
-    arduino.open()
-    if __name__ == '__main__':
+    try:
+        arduino.open()
+    except:
+        pass
+    if __name__ == '__main__' and arduino.isOpen():
        # with serial.Serial("/dev/ttyACM0", 115200, timeout=1) as arduino:
         time.sleep(1) #wait for serial to open
         print('Running. Press CTRL-C to exit.')
-        answer=arduino.readline().decode('utf-8').rstrip()
+        answer = 0
+        #answer=arduino.readline().decode('utf-8').rstrip()
         arduino.flushInput()
         saved_time = time.time()
         while answer != 'MPU Initialized' and Timeout(saved_time, 1):
             if arduino.isOpen():
                 if  arduino.in_waiting > 0:
                     answer=arduino.readline().decode('utf-8').rstrip()
-                    #answer=arduino.readline().decode('utf-8').rstrip()
                     print(answer)
                
 #Used to print data received from the EPS to the python terminal.
@@ -332,7 +372,15 @@ def print_list(l):
         for c in l:
             print(c, end='')
         print()
-
+def create_list(l):
+    if l == ' ' or l is None:
+        epsdata = '~'
+        return epsdata
+    else:
+        for  c in l:
+            epsdata = c
+            return epsdata
+        
 #Requests a single byte from the EPS
 def read_single_EPS():
     try:
@@ -376,11 +424,19 @@ def PreData():
 def EPSTransmit():
         rx_data = read_multi_EPS()
         if rx_data is not None:
+            #print(rx_data)
             print_list(rx_data)
+            try:
+                epsdata = ",".join(rx_data)
+                epsdata = epsdata.replace(',', '')
+            except:
+                epsdata = "~"
+                pass
             PreData()
             writeString(stm_address, "EPS Data: ")
             OBC_to_COMMS(rx_data)
-            writeNumber(stm_address, '>')
+            if ((int(time.time()) - int(program_start_time)) % 5 == 0):
+                csvLogger(epsdata)
 
 #Transmits ADCS data to COMMS
 def ADCSTransmit():
@@ -394,14 +450,15 @@ def ADCSTransmit():
                 print(answer)
                 writeNumber(stm_address, '<')
                 PreData()
-                writeString(stm_address, "Orientation Data: ")
+                writeString(stm_address, "GPS Data: ")
                 OBC_to_COMMS(answer)
                 writeNumber(stm_address, '>')
                 arduino.flushInput()
             time.sleep(0.1)
         else:
-            print("no data!")
-        arduino.flushInput()
+            print("ADCS Not Connected!")
+        if arduino.isOpen():
+            arduino.flushInput()
 
 
 
@@ -413,8 +470,10 @@ def main():
     
 ######################### INITIALIZATION ###########################
     print("Hello World!")
+    csvInit()
     LEDInit()
     OrientationInit()
+
 
 ########################### MAIN LOOP ##############################
     
@@ -424,9 +483,9 @@ def main():
         #call LED indicator
         LEDindicator()
         #Transmit data from ADCS to Comms
-        #ADCSTransmit()
+        ADCSTransmit()
         #Transmit data from EPS to Comms
-        #EPSTransmit()
+        EPSTransmit()
         time.sleep(0.2)
 
 if __name__ == "__main__":
