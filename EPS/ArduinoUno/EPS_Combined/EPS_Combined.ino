@@ -11,7 +11,7 @@
  * TO DO:
  *    - include current values in a buffer called data_tx ( just make sure that the buffer in main loop is the same buffer called in sendData() ).  
  *    - cast data in data_tx buffer as char (we can really only send one byte or char at a time).
- *          - can not be a float. If decimal values are needed, multiply out and let Jake Miley know. 
+ *          - can not be a float. If decimal values are needed, multiply out and let Jake Milley know. 
  *    - package important data with a tag, time stamp, and the actual data (for example: <S1$00212100>)
  *          - < > start and end characters 
  *          - $ seperates data pieces
@@ -27,7 +27,7 @@
 
 #define SLAVE_ADDRESS 0x11
 #define RX_BUFFER_SIZE 5
-#define TX_BUFFER_SIZE 44
+#define TX_BUFFER_SIZE 25
 #define CURRENT_REFERENCE 2110
 #define ARDUINO_REFERENCE 4.98
 #define ANALOG_RESOLUTION 1.024
@@ -56,7 +56,8 @@ int current_reference = 2500;
 float arduino_reference = 4.98;
 float analog_resolution = 1.024;
 
-String data_tx_str = "<EPS P1: A.AAA P2: B.BBB O: C.CCC C: D.DDD>";
+//Payload 1 is A, Payload 2 is B, OBC is C, Comms is D
+String data_tx_str = "<A.AAA B.BBB C.CCC D.DDD>";
 
 
 
@@ -67,7 +68,7 @@ void setup() {
   Wire.begin(SLAVE_ADDRESS);
   Wire.onReceive(receiveData);
   Wire.onRequest(sendData);
-  for (int i = 0; i < 44; i++){ 
+  for (int i = 0; i < TX_BUFFER_SIZE; i++){ 
   data_tx[i] = data_tx_str[i];
   }
 
@@ -95,14 +96,7 @@ void loop() {
   sensorValue4 = sensorValue4 / avgSamples;
   //sensorValue5 = sensorValue5 / avgSamples;
 
-  Serial.print(sensorValue1);
-  Serial.print("\n");
-  Serial.print(sensorValue2);
-  Serial.print("\n");
-  Serial.print(sensorValue3);
-  Serial.print("\n");
-  Serial.print(sensorValue4);
-  Serial.print("\n");
+
   // The current sensors have a current offset of approximately +2.11 Volts. Subtracting it by the current sensor reference current gives us a value in A
   // The current is in millivolts
   float current1 = (sensorValue1-current_reference)/sensitivity/1000;
@@ -121,15 +115,6 @@ void loop() {
   if (current4 < 0) {
         current4 = 0;
   }
-  Serial.print(current1);
-  Serial.print("\n");
-  Serial.print(current2);
-  Serial.print("\n");
-  Serial.print(current3);
-  Serial.print("\n");
-  Serial.print(current4);
-  Serial.print("\n");
-  delay(500);
 
 
   //float current5 = (current5 - Vref5) * sensitivity;
@@ -163,15 +148,12 @@ void loop() {
 
 
   for (int i = 0; i <= 4; i++){
-    data_tx[9 + i] = current1_str[i];
-    data_tx[19 + i] = current2_str[i];
-    data_tx[28 + i] = current3_str[i];
-    data_tx[37 + i] = current4_str[i];
+    data_tx[1 + i] = current1_str[i];
+    data_tx[7 + i] = current2_str[i];
+    data_tx[13 + i] = current3_str[i];
+    data_tx[19 + i] = current4_str[i];
   }
-  Serial.print(data_tx[2]);
-  Serial.print(data_tx[0]);
-  Serial.print("\n");
-
+  Serial.print(data_tx);
   // Reset the sensor value for the next reading
   sensorValue1 = 0;
   sensorValue2 = 0;
