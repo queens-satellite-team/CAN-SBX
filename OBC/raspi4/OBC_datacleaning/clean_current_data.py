@@ -35,6 +35,6 @@ message_df = message_df.dropna()
 df_mean = message_df[["P1", "P2", "OBC", "Comms"]].mean()
 print(df_mean)
 
-message_df.to_csv('current_messages.csv', index=False)
+message_df.to_csv('current_values.csv', index=False)
 
 
