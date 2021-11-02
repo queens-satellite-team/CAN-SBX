@@ -2,11 +2,21 @@
 # Last updated: July 17 2021 by Kate Szabo kate.szabo@queensu.ca
 # This script executes the main control script for the payload for CAN-SBX 2021
 
+import time
 import picamera
 import datetime as dt
 import RPi.GPIO as GPIO
+import signal
 import os
+from pathlib import Path
 
+def handler(sig, frame):
+    print("Signal!")
+    open('/home/pi/payload_watchdog/temp.dog','a')
+    signal.alarm(5)
+
+signal.signal(signal.SIGALRM,handler)
+signal.alarm(5)
 # WRITE PIN HIGH TO OBC
 # Pin setup
 GPIO.setmode(GPIO.BCM)
