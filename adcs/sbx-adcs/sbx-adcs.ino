@@ -95,7 +95,7 @@ String readGPS() {
   time_data = String(gps.time.hour()) + "," + String(gps.time.minute()) + "," + String(gps.time.second());
 #endif
 #ifdef GPS_get_coords
-  coords_data = String(gps.location.lat(), 6) + "," + String(gps.location.lng(), 6);
+  coords_data = String(gps.location.lat(), 4) + "," + String(gps.location.lng(), 4);
 #endif
 #ifdef GPS_get_alt
   alt_data = String(gps.altitude.meters());

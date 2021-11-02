@@ -1,7 +1,7 @@
 # Payload Integration Instructions
 ## Components 
 * Raspberry Pi Zero WH
-  * Payload 1 password: raspberry
+  * Payload 1 password: payload1
   * Payload 2 password: payload2
 * 32GB MicroSD card
 * Pi0 ribbon cable
@@ -17,6 +17,7 @@
 6. Focus the camera lenses. Use "raspivid -t 0" to show the camera preview. Turn the camera lenses until they are focused as far away as possible. Exit the preview with Ctrl+C.
 7. Set up pi to automatically run camera code on startup following the instructions for the first method [here](https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/).
 Set the path to "/home/pi/CAN-SBX/Payload/PiCamCode.py".
+8. Create a folder in the payload directory called "videos" using "sudo mkdir videos"
 
 ## User instructions
 1. Ensure all components securely connected

@@ -31,6 +31,7 @@ import serial,time
 from serial import Serial
 import RPi.GPIO as GPIO
 import time
+import datetime
 import board
 import neopixel
 import os
@@ -42,11 +43,11 @@ bus = smbus.SMBus(1)
 
 #STM Slave Address
 global stm_address
-stm_address = 0x04
+stm_address = 0x4
 
 #Arduino Slave Address
 global arduino_address
-arduino_address = 0x11
+arduino_address = 0x8
 
 global program_start_time
 program_start_time = time.time()
@@ -57,7 +58,8 @@ program_start_time = time.time()
 #csv data logging
 def csvInit():
     global csv_name
-    csv_name = str(program_start_time)
+    csv_name = datetime.datetime.fromtimestamp(program_start_time).strftime('%Y%m%d%H%M%S%f')
+    # csv_name = str(program_start_time)
     csvfile = open(csv_name, 'w', newline ='', encoding='utf-8')
     c = csv.writer(csvfile)
     c.writerow(['Minutes', 'Seconds', 'Milliseconds', 'Message'])
@@ -220,14 +222,12 @@ def ClockMatching():
     if payload1status == 0 and GPIO.input(payload1Pin):
         writeString(stm_address, "<Payload 1 turned on ")
         writeTime(stm_address)
-        writeString(stm_address, " after the OBC turned on>")
         payload1status = 1
         csvLogger("Payload 1 turns on")
         
     if payload2status == 0 and GPIO.input(payload2Pin):
         writeString(stm_address, "<Payload 2 turned on ")
         writeTime(stm_address)
-        writeString(stm_address, " after the OBC turned on>")
         payload2status = 1
         csvLogger("Payload 2 turns on")
         
@@ -235,7 +235,6 @@ def ClockMatching():
         writeNumber(stm_address, '<')
         writeString(stm_address, "EPS turned on ")
         writeTime(stm_address)
-        writeString(stm_address, " after the OBC turned on>")
         epsstatus = 1
         csvLogger("EPS turns on")
         
@@ -243,7 +242,6 @@ def ClockMatching():
         writeNumber(stm_address, '<')
         writeString(stm_address, "ADCS turned on ")
         writeTime(stm_address)
-        writeString(stm_address, " after the OBC turned on>")
         adcsstatus = 1
         csvLogger("ADCS turns on")
         
@@ -251,21 +249,18 @@ def ClockMatching():
         writeNumber(stm_address, '<')
         writeString(stm_address, "Comms turned on ")
         writeTime(stm_address)
-        writeString(stm_address, " after the OBC turned on>")
         commsstatus = 1
         csvLogger("Comms turns on") 
          
     if payload1status == 1 and not GPIO.input(payload1Pin):
         writeString(stm_address, "<Payload 1 turned off ")
         writeTime(stm_address)
-        writeString(stm_address, " after the OBC turned on>")
         payload1status = 0
         csvLogger("Payload 1 turns off")
         
     if payload2status == 1 and not GPIO.input(payload2Pin):
         writeString(stm_address, "<Payload 2 turned off ")
         writeTime(stm_address)
-        writeString(stm_address, " after the OBC turned on>")
         payload2status = 0
         csvLogger("Payload 2 turns off")
         
@@ -281,7 +276,6 @@ def ClockMatching():
         writeNumber(stm_address, '<')
         writeString(stm_address, "ADCS turned off ")
         writeTime(stm_address)
-        writeString(stm_address, " after the OBC turned on>")
         adcsstatus = 0
         csvLogger("ADCS turns off")
         
@@ -289,7 +283,6 @@ def ClockMatching():
         writeNumber(stm_address, '<')
         writeString(stm_address, "Comms turned off ")
         writeTime(stm_address)
-        writeString(stm_address, " after the OBC turned on>")
         commsstatus = 0   
         csvLogger("Comms turns off")
         
@@ -404,7 +397,7 @@ def read_multi_EPS():
 
 #Transmits 'data' from OBC to comms. Note that start characters ('<') and end characters ('>') are required as well.
 def OBC_to_COMMS(data):
-    data_list=list(data)
+    data_list = list(data)
     for i in data_list:
         #Sends to the Slaves
         if i is None:
@@ -434,6 +427,9 @@ def EPSTransmit():
                 pass
             PreData()
             writeString(stm_address, "EPS Data: ")
+            writeNumber(stm_address, '>')
+            time.sleep(0.05)
+            writeNumber(stm_address, '<')
             OBC_to_COMMS(rx_data)
             if ((int(time.time()) - int(program_start_time)) % 5 == 0):
                 csvLogger(epsdata)
@@ -448,9 +444,11 @@ def ADCSTransmit():
                 input=arduino.in_waiting
                 answer=arduino.read(input).decode('utf-8').rstrip()
                 print(answer)
-                writeNumber(stm_address, '<')
                 PreData()
                 writeString(stm_address, "GPS Data: ")
+                writeNumber(stm_address, '>')
+                time.sleep(0.05)
+                writeNumber(stm_address, '<')
                 OBC_to_COMMS(answer)
                 writeNumber(stm_address, '>')
                 arduino.flushInput()
