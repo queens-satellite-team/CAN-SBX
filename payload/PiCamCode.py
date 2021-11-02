@@ -25,35 +25,31 @@ iWide = 1920
 
 # Get start time
 
-video_length = 900  # Video length in seconds (3600 = 1 hour)
-num_videos = 16  # Number of videos. Note, last video will be corrupted if Pi is powered off before time is up.
+video_length = 60  # Video length in seconds (3600 = 1 hour)
+num_videos = 240  # Number of videos. Note, last video will be corrupted if Pi is powered off before time is up.
 
 # Connect to pi cam and set up
 with picamera.PiCamera() as camera:
-    
-    try:
-        camera.resolution = iWide, iHigh
-        camera.framerate = 30  # fps
-        # time.sleep(2)
+    camera.resolution = iWide, iHigh
+    camera.framerate = 30  # fps
+    # time.sleep(2)
 
-        camera.annotate_background = picamera.Color('black')
+    camera.annotate_background = picamera.Color('black')
 
-        for n in range(num_videos):
-            t0 = dt.datetime.now()
-            file_name = t0.strftime('%Y%m%d%H%M%S')
-            file_path = f"/home/pi/CAN-SBX/payload/videos/{run_timestamp}/{file_name}"
-            camera.annotate_text = t0.strftime('%H:%M:%S.%f')
+    for n in range(num_videos):
+        t0 = dt.datetime.now()
+        file_name = t0.strftime('%Y%m%d%H%M%S')
+        file_path = f"/home/pi/CAN-SBX/payload/videos/{run_timestamp}/{file_name}"
+        camera.annotate_text = t0.strftime('%H:%M:%S.%f')
 
-            camera.start_recording(f'{file_path}.h264')
-            start = dt.datetime.now()
-            print("Started")
-            while (dt.datetime.now() - start).seconds < video_length:
-                camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
-                camera.wait_recording(0.2)
-            camera.stop_recording()
-
-    finally:
-        camera.close()
+        camera.start_recording(f'{file_path}.h264')
+        start = dt.datetime.now()
+        print("Started")
+        while (dt.datetime.now() - start).seconds < video_length:
+            camera.annotate_text = dt.datetime.now().strftime('%H:%M:%S.%f')
+            camera.wait_recording(0.2)
+        camera.stop_recording()
+    camera.close()
 
 # WRITE PIN LOW TO OBC
 GPIO.output(pin_out, GPIO.LOW) #Sets pin to 0V
